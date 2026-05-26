@@ -2,28 +2,55 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Mono } from '../ui/Typography';
 import { useRef, useEffect, useState } from 'react';
 
-// Decrypting Signal focus lock text animation
-const SignalFocusText = ({ text, scrollYProgress }: { text: string; scrollYProgress: any }) => {
+// Monumental System Stabilization Text
+const SignalFocusText = ({ text }: { text: string }) => {
   const [displayText, setDisplayText] = useState(text);
+  const [isStabilizing, setIsStabilizing] = useState(true);
 
   useEffect(() => {
-    return scrollYProgress.on("change", (latest: number) => {
-      // Calculate decryption progress (scrambled at bottom entry -> fully decoded at bottom exit)
-      const decryptProgress = Math.max(0, Math.min(1, (latest - 0.3) / 0.65));
-      const charsToDecrypt = Math.floor(decryptProgress * text.length);
-
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%@$";
-      const result = text.split("").map((char, index) => {
-        if (char === " " || char === "\n") return char;
-        if (index < charsToDecrypt) return text[index];
-        return chars[Math.floor(Math.random() * chars.length)];
-      }).join("");
+    let scrambleInterval: ReturnType<typeof setInterval>;
+    
+    const stabilize = () => {
+      setIsStabilizing(true);
       
-      setDisplayText(result);
-    });
-  }, [text, scrollYProgress]);
+      let progress = 0;
+      scrambleInterval = setInterval(() => {
+        progress += 0.05; // Fast 0.6s transition (0.05 * 12 ticks = 0.6s)
+        
+        if (progress >= 1) {
+          setDisplayText(text);
+          clearInterval(scrambleInterval);
+          setIsStabilizing(false);
+          return;
+        }
 
-  return <span>{displayText}</span>;
+        const charsToDecrypt = Math.floor(progress * text.length);
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%@$";
+        const result = text.split("").map((char, index) => {
+          if (char === " " || char === "\n") return char;
+          if (index < charsToDecrypt) return text[index];
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join("");
+        
+        setDisplayText(result);
+      }, 50); // 50ms tick
+    };
+
+    // Initial stabilization
+    setTimeout(stabilize, 500);
+
+    // Occasional re-stabilization loop (every 6 seconds)
+    const cycle = setInterval(() => {
+      stabilize();
+    }, 6000);
+
+    return () => {
+      clearInterval(scrambleInterval);
+      clearInterval(cycle);
+    };
+  }, [text]);
+
+  return <span className={isStabilizing ? "text-primary-500 opacity-80" : ""}>{displayText}</span>;
 };
 
 export const Contact = () => {
@@ -73,13 +100,13 @@ export const Contact = () => {
           >
             <h2 className="text-4xl sm:text-6xl md:text-8xl lg:text-[10rem] xl:text-[12rem] font-bold tracking-tighter leading-[0.85] text-text-light group-hover:text-white transition-colors duration-1000 inline-block text-center w-full pb-8 font-sans">
               <span className="text-primary-600 group-hover:text-primary-300 transition-colors duration-1000">
-                <SignalFocusText text="BUILDING" scrollYProgress={scrollYProgress} />
+                <SignalFocusText text="BUILDING" />
               </span><br/>
-              <SignalFocusText text="SYSTEMS" scrollYProgress={scrollYProgress} /><br/>
+              <SignalFocusText text="SYSTEMS" /><br/>
               <span className="text-primary-600 group-hover:text-primary-300 transition-colors duration-1000">
-                <SignalFocusText text="THAT FEEL" scrollYProgress={scrollYProgress} />
+                <SignalFocusText text="THAT FEEL" />
               </span><br/>
-              <SignalFocusText text="ALIVE." scrollYProgress={scrollYProgress} />
+              <SignalFocusText text="ALIVE." />
             </h2>
           </a>
        </motion.div>

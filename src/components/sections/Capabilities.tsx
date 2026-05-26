@@ -23,6 +23,8 @@ const capabilityGroups = [
 
 export const Capabilities = () => {
   const [activeItem, setActiveItem] = useState({ col: 0, row: 0 });
+  const [hoveredItem, setHoveredItem] = useState<{ col: number, row: number } | null>(null);
+  const [mockLatency, setMockLatency] = useState(12);
 
   // Periodically cycle active item to simulate dependency scanner
   useEffect(() => {
@@ -32,6 +34,7 @@ export const Capabilities = () => {
         const nextCol = nextRow === 0 ? (prev.col + 1) % 4 : prev.col;
         return { col: nextCol, row: nextRow };
       });
+      setMockLatency(Math.floor(Math.random() * 15) + 5);
     }, 1800);
     return () => clearInterval(interval);
   }, []);
@@ -66,34 +69,51 @@ export const Capabilities = () => {
               </div>
               <ul className="flex flex-col gap-0">
                 {group.items.map((item, idx) => {
-                  const isActive = activeItem.col === index && activeItem.row === idx;
+                  const isScanning = activeItem.col === index && activeItem.row === idx;
+                  const isHovered = hoveredItem?.col === index && hoveredItem?.row === idx;
+                  const isDependency = hoveredItem !== null && hoveredItem.col !== index && hoveredItem.row === idx; // Mock dependency relation
+                  const isActive = isScanning || isHovered;
+
                   return (
                     <li 
-                      key={idx} 
-                      className={`flex justify-between items-center text-sm md:text-base border-b border-primary-800/40 py-4 group transition-all duration-500 px-2 rounded-sm relative overflow-hidden ${isActive ? 'text-accent bg-accent/5' : 'text-text-light/80 hover:text-white hover:bg-primary-800/20'}`}
+                      key={idx}
+                      onMouseEnter={() => setHoveredItem({ col: index, row: idx })}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      className={`flex justify-between items-center text-sm md:text-base border-b border-primary-800/40 py-4 group transition-all duration-500 px-2 rounded-sm relative overflow-hidden ${isActive ? 'text-accent bg-accent/5' : isDependency ? 'text-white bg-primary-800/10' : 'text-text-light/80 hover:text-white hover:bg-primary-800/20'}`}
                     >
                       {/* Active scanner glow line */}
                       {isActive && (
                         <motion.div 
                           className="absolute left-0 top-0 bottom-0 w-[2px] bg-accent"
-                          layoutId="activeCapScannerGlow"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
                         />
                       )}
                       
                       <div className="flex items-center gap-3">
                         <span>{item}</span>
-                        {isActive && (
+                        {isScanning && (
                           <span className="text-[8px] font-mono border border-accent/30 bg-accent/10 px-1 rounded animate-pulse select-none">
                             SCANNING
                           </span>
                         )}
+                        {isDependency && (
+                          <span className="text-[8px] font-mono text-primary-500 tracking-widest select-none">
+                            &lt;-- DEPENDENCY
+                          </span>
+                        )}
                       </div>
                       
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
+                        {isActive && (
+                          <span className="text-[8px] font-mono text-accent animate-pulse">
+                            {mockLatency}MS
+                          </span>
+                        )}
                         <span className="text-[8px] font-mono text-primary-700 group-hover:text-primary-500 tracking-tighter uppercase select-none">
-                          {isActive ? 'INTEG_OK' : 'READY'}
+                          {isActive ? 'INTEG_OK' : isDependency ? 'LINKED' : 'READY'}
                         </span>
-                        <Mono className={`text-[9px] transition-colors duration-300 ${isActive ? 'text-accent' : 'text-primary-700 group-hover:text-primary-500'}`}>
+                        <Mono className={`text-[9px] transition-colors duration-300 ${isActive ? 'text-accent' : isDependency ? 'text-white' : 'text-primary-700 group-hover:text-primary-500'}`}>
                           SYS_{String(idx + 1).padStart(2, '0')}
                         </Mono>
                       </div>

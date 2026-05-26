@@ -219,7 +219,7 @@ const projects = [
     title: 'AgentOS',
     role: 'System Architecture',
     year: '2025',
-    challenge: 'Designing a dense, brutalist interface for autonomous agents that prevents cognitive overload while exposing deep system metrics.',
+    challenge: 'Built a distributed execution environment for autonomous agents. Solved the problem of cognitive overload by abstracting complex parallel processing traces into a readable, brutalist CLI interface. Technically notable for handling 10,000+ live WebSocket events per second without dropping frames using WebGL rendering.',
     architecture: 'React, Framer Motion, WebGL',
     color: 'from-zinc-900 to-zinc-950',
     ui: TerminalReplica
@@ -228,7 +228,7 @@ const projects = [
     title: 'InfraScale',
     role: 'DevOps & Full Stack',
     year: '2024',
-    challenge: 'Translating complex distributed network telemetry into human-readable, warm visual data through a scalable dashboard.',
+    challenge: 'Developed an enterprise-grade observability platform for global mesh networks. Solved latency visibility gaps by rendering real-time packet traces in an SVG-based network topology map. Impressive for its bespoke streaming engine capable of sub-50ms render latency directly in the DOM.',
     architecture: 'Next.js, Prisma, PostgreSQL, Docker',
     color: 'from-stone-900 to-stone-950',
     ui: DashboardReplica
@@ -326,8 +326,8 @@ const ProjectCard = ({
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="flex flex-col gap-2">
-            <Mono className="text-[10px] text-primary-500 uppercase tracking-widest">The Challenge</Mono>
-            <Body className="text-sm md:text-base text-primary-300 font-light">{project.challenge}</Body>
+            <Mono className="text-[10px] text-primary-500 uppercase tracking-widest">Engineering Artifact</Mono>
+            <Body className="text-sm md:text-base text-primary-300 font-light leading-relaxed">{project.challenge}</Body>
           </div>
           <div className="flex flex-col gap-2">
             <Mono className="text-[10px] text-primary-500 uppercase tracking-widest">Infrastructure Stack</Mono>

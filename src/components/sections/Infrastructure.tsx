@@ -130,8 +130,8 @@ export const Infrastructure = () => {
               width="6" height="6"
               fill="#FF5A36" 
               style={{ offsetPath: 'path("M 100,300 L 250,300 L 250,150 L 600,150")' }}
-              animate={{ offsetDistance: ["0%", "20%", "20%", "40%", "40%", "100%"] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear", times: [0, 0.2, 0.3, 0.5, 0.6, 1] }}
+              animate={{ offsetDistance: ["0%", "33%", "33%", "100%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", times: [0, 0.4, 0.6, 1] }}
             />
 
             {/* Active Packet Flow 2 (Green Edge -> Worker) */}
@@ -139,8 +139,8 @@ export const Infrastructure = () => {
               width="6" height="6"
               fill="#22C55E" 
               style={{ offsetPath: 'path("M 100,300 L 250,300 L 250,450 L 600,450")' }}
-              animate={{ offsetDistance: ["0%", "100%"] }}
-              transition={{ duration: 3.8, repeat: Infinity, ease: "linear", delay: 1.2 }}
+              animate={{ offsetDistance: ["0%", "33%", "33%", "100%"] }}
+              transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 1.2, times: [0, 0.3, 0.5, 1] }}
             />
 
             {/* Active Packet Flow 3 (Gateway -> DB Cluster) */}
@@ -148,8 +148,8 @@ export const Infrastructure = () => {
               width="6" height="6"
               fill="#FF5A36" 
               style={{ offsetPath: 'path("M 600,150 L 750,150 L 750,300 L 900,300")' }}
-              animate={{ offsetDistance: ["0%", "40%", "40%", "100%"] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: "linear", delay: 0.5, times: [0, 0.3, 0.5, 1] }}
+              animate={{ offsetDistance: ["0%", "50%", "50%", "100%"] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.5, times: [0, 0.4, 0.7, 1] }}
             />
 
             {/* Active Packet Flow 4 (Worker -> DB Cluster) */}
@@ -157,8 +157,8 @@ export const Infrastructure = () => {
               width="6" height="6"
               fill="#22C55E" 
               style={{ offsetPath: 'path("M 600,450 L 750,450 L 750,300 L 900,300")' }}
-              animate={{ offsetDistance: ["0%", "100%"] }}
-              transition={{ duration: 3.2, repeat: Infinity, ease: "linear", delay: 2.1 }}
+              animate={{ offsetDistance: ["0%", "50%", "50%", "100%"] }}
+              transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: 2.1, times: [0, 0.4, 0.6, 1] }}
             />
           </svg>
 
