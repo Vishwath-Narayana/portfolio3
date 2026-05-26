@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-900: #050505;
+  --color-primary-800: #0B0B0B;
+  --color-primary-700: #111111;
+  --color-warm-50: #F7F3EE;
+  --color-warm-100: #EFE9E1;
+  --color-text-light: #F5F5F5;
+  --color-text-muted: #A1A1AA;
+  --color-accent: #FF5A36;
+
+  --font-sans: "Inter", "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+}
+
+@layer base {
+  :root {
+    background-color: var(--color-primary-900);
+    color: var(--color-text-light);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+}
+
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
