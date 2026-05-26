@@ -8,7 +8,7 @@ interface TypographyProps extends React.HTMLAttributes<HTMLElement> {
 
 export const Display = ({ children, className, as: Component = 'h1', ...props }: TypographyProps) => {
   return (
-    <Component className={cn("text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter leading-[0.9]", className)} {...props}>
+    <Component className={cn("text-5xl md:text-7xl lg:text-9xl font-bold tracking-[-0.04em] leading-[0.85]", className)} {...props}>
       {children}
     </Component>
   );
@@ -16,7 +16,7 @@ export const Display = ({ children, className, as: Component = 'h1', ...props }:
 
 export const Heading = ({ children, className, as: Component = 'h2', ...props }: TypographyProps) => {
   return (
-    <Component className={cn("text-3xl md:text-5xl font-semibold tracking-tight leading-tight", className)} {...props}>
+    <Component className={cn("text-3xl md:text-5xl font-semibold tracking-[-0.02em] leading-tight", className)} {...props}>
       {children}
     </Component>
   );
@@ -32,7 +32,7 @@ export const Body = ({ children, className, as: Component = 'p', ...props }: Typ
 
 export const Mono = ({ children, className, as: Component = 'span', ...props }: TypographyProps) => {
   return (
-    <Component className={cn("font-mono text-xs md:text-sm uppercase tracking-widest text-text-muted", className)} {...props}>
+    <Component className={cn("font-mono text-xs md:text-sm uppercase tracking-[0.1em] text-primary-500/60", className)} {...props}>
       {children}
     </Component>
   );
