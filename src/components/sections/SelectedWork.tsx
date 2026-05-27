@@ -7,8 +7,8 @@ import { Heading, Mono, Body, StaggeredReveal } from '../ui/Typography';
 const TopologyOverlay = ({ seed }: { seed: number }) => {
   // Deterministic node positions based on seed
   const nodes = Array.from({ length: 7 }, (_, i) => ({
-    cx: ((Math.sin(seed + i * 1.7) * 0.5 + 0.5) * 80 + 10),
-    cy: ((Math.cos(seed + i * 2.3) * 0.5 + 0.5) * 70 + 15),
+    cx: String((Math.sin(seed + i * 1.7) * 0.5 + 0.5) * 80 + 10),
+    cy: String((Math.cos(seed + i * 2.3) * 0.5 + 0.5) * 70 + 15),
   }));
   // Connect some node pairs
   const edges = [
@@ -47,6 +47,9 @@ const TopologyOverlay = ({ seed }: { seed: number }) => {
         r="0.6"
         fill="rgba(255,90,54,0.5)"
         filter={`url(#glow-${seed})`}
+        cx={nodes[0].cx}
+        cy={nodes[0].cy}
+        initial={{ cx: nodes[0].cx, cy: nodes[0].cy }}
         animate={{
           cx: [nodes[0].cx, nodes[1].cx, nodes[2].cx, nodes[3].cx, nodes[0].cx],
           cy: [nodes[0].cy, nodes[1].cy, nodes[2].cy, nodes[3].cy, nodes[0].cy],
@@ -56,6 +59,9 @@ const TopologyOverlay = ({ seed }: { seed: number }) => {
       <motion.circle
         r="0.4"
         fill="rgba(255,90,54,0.3)"
+        cx={nodes[4].cx}
+        cy={nodes[4].cy}
+        initial={{ cx: nodes[4].cx, cy: nodes[4].cy }}
         animate={{
           cx: [nodes[4].cx, nodes[5].cx, nodes[6].cx, nodes[4].cx],
           cy: [nodes[4].cy, nodes[5].cy, nodes[6].cy, nodes[4].cy],
@@ -71,6 +77,7 @@ const TopologyOverlay = ({ seed }: { seed: number }) => {
           fill="rgba(255,90,54,0.08)"
           stroke="rgba(255,90,54,0.2)"
           strokeWidth="0.3"
+          initial={{ r: 1, opacity: 0.3 }}
           animate={{ r: [0.8, 1.2, 0.8], opacity: [0.3, 0.7, 0.3] }}
           transition={{ duration: 3 + i * 0.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.2 }}
         />

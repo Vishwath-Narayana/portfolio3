@@ -1,6 +1,6 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValue, useSpring, useAnimationFrame } from 'framer-motion';
 import { Body } from '../ui/Typography';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 // ─── Particle Field ────────────────────────────────────────────────────────────
 // 16 curated particles with directional environmental flow (rightward drift +
@@ -299,212 +299,201 @@ const ForegroundDepth = () => (
   </div>
 );
 
-// ─── Architectural Typography ──────────────────────────────────────────────────
-// Each word is individually tuned for opacity AND blur — creating genuine
-// atmospheric depth rather than just transparency variation.
-// BUILDING is closest (sharpest, brightest). ALIVE. is deepest (blurred, near-invisible).
-const ArchitecturalTypography = ({ y }: { y: any }) => (
-  <motion.div
-    className="absolute pointer-events-none select-none z-[2]"
-    style={{ top: '-2%', left: '-1%', right: 0, y }}
-  >
-    <div
-      className="font-black text-[#EAE5E1] overflow-visible"
+// ─── Interactive Typography ────────────────────────────────────────────────────
+const InteractiveWord = ({ text, mouseX, mouseY, delay }: { text: string, mouseX: any, mouseY: any, delay: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useSpring(0, { stiffness: 120, damping: 20 });
+  const y = useSpring(0, { stiffness: 120, damping: 20 });
+  const glow = useSpring(0, { stiffness: 80, damping: 20 });
+
+  useAnimationFrame(() => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const mX = mouseX.get();
+    const mY = mouseY.get();
+    
+    if (mX === 0 && mY === 0) return;
+
+    const dist = Math.sqrt(Math.pow(mX - centerX, 2) + Math.pow(mY - centerY, 2));
+    const maxDist = 400;
+
+    if (dist < maxDist) {
+      const pull = Math.pow(1 - dist / maxDist, 2) * 12;
+      const dx = (centerX - mX) / dist || 0;
+      const dy = (centerY - mY) / dist || 0;
+      x.set(dx * pull);
+      y.set(dy * pull);
+      glow.set(1 - dist / maxDist);
+    } else {
+      x.set(0);
+      y.set(0);
+      glow.set(0);
+    }
+  });
+
+  const textShadow = useTransform(glow, v => `0 0 ${v * 40}px rgba(255,90,54,${v * 0.3})`);
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 15, scale: 0.99 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 1.0, ease: [0.25, 1, 0.5, 1], delay }}
+      style={{ x, y, textShadow }}
+      className="inline-block cursor-default"
+    >
+      {text}
+    </motion.div>
+  );
+};
+
+const InteractiveHeadline = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
+  return (
+    <div 
+      className="font-black text-white leading-[0.9] tracking-[-0.03em] flex flex-col items-start gap-1 md:gap-2"
       style={{
-        fontSize: 'clamp(5.2rem, 18vw, 25rem)',
-        lineHeight: 0.8,
-        letterSpacing: '-0.035em',
+        fontSize: 'clamp(2.8rem, 6.5vw, 7.5rem)',
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
       }}
     >
-      {/* BUILDING — foreground word. Most visible. No blur. Anchors everything. */}
-      <motion.div
-        animate={{ opacity: [0.15, 0.24, 0.15] }}
-        transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        BUILDING
-      </motion.div>
-
-      {/* SYSTEMS — slight recession. Very subtle blur begins. */}
-      <motion.div
-        style={{
-          paddingLeft: '4%',
-          filter: 'blur(0.3px)',
-        }}
-        animate={{ opacity: [0.085, 0.13, 0.085] }}
-        transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-      >
-        SYSTEMS
-      </motion.div>
-
-      {/* THAT FEEL — mid-depth. Blur increases. Fades toward the dark right vignette. */}
-      <motion.div
-        style={{
-          paddingLeft: '9%',
-          filter: 'blur(0.8px)',
-          WebkitMaskImage: 'linear-gradient(to right, rgba(255,255,255,1) 30%, rgba(255,255,255,0.6) 65%, rgba(255,255,255,0.2) 88%, transparent 100%)',
-          maskImage: 'linear-gradient(to right, rgba(255,255,255,1) 30%, rgba(255,255,255,0.6) 65%, rgba(255,255,255,0.2) 88%, transparent 100%)',
-        }}
-        animate={{ opacity: [0.048, 0.078, 0.048] }}
-        transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
-      >
-        THAT FEEL
-      </motion.div>
-
-      {/* ALIVE. — deepest distance. Heaviest blur. Almost disappears completely. */}
-      <motion.div
-        style={{
-          paddingLeft: '16%',
-          filter: 'blur(1.8px)',
-          WebkitMaskImage: 'linear-gradient(to right, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0.08) 78%, transparent 92%)',
-          maskImage: 'linear-gradient(to right, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0.08) 78%, transparent 92%)',
-        }}
-        animate={{ opacity: [0.025, 0.048, 0.025] }}
-        transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut', delay: 9 }}
-      >
-        ALIVE.
-      </motion.div>
+      <div className="flex gap-4">
+        <InteractiveWord text="HEY," mouseX={mouseX} mouseY={mouseY} delay={0.05} />
+        <InteractiveWord text="I'M" mouseX={mouseX} mouseY={mouseY} delay={0.12} />
+      </div>
+      <InteractiveWord text="VISHWATH." mouseX={mouseX} mouseY={mouseY} delay={0.2} />
     </div>
-  </motion.div>
-);
+  );
+};
 
-// ─── Intelligence Panel ────────────────────────────────────────────────────────
-// Embedded into the atmospheric environment rather than floating above it.
-// The panel uses a very dark semi-transparent bg so the typography bleeds
-// faintly through its left edge. Left bleed gradient ties it to the bg fog.
-const IntelligencePanel = () => (
-  <motion.div
-    className="absolute z-[20] hidden md:flex flex-col"
-    style={{
-      right: '4.5%',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      width: 'clamp(230px, 19vw, 288px)',
-    }}
-    initial={{ opacity: 0, x: 18 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: 1.6, duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
-  >
-    {/* Atmospheric bleed — soft fog hazing left edge of panel into the bg */}
-    <div className="absolute -left-8 -top-4 -bottom-4 w-12 pointer-events-none z-0"
-      style={{
-        background: 'linear-gradient(to right, transparent 0%, rgba(255,45,15,0.015) 50%, transparent 100%)',
-        filter: 'blur(8px)',
-      }}
-    />
-    <div
-      className="relative bg-[#020202]/82 backdrop-blur-2xl z-[1]"
-      style={{
-        border: '1px solid rgba(255,255,255,0.032)',
-        borderLeft: '1px solid rgba(255,255,255,0.022)',
-        boxShadow: '0 0 0 1px rgba(255,255,255,0.008), 0 40px 120px rgba(0,0,0,0.98), inset 1px 0 0 rgba(255,255,255,0.012)',
-      }}
+// ─── Cinematic Portrait ────────────────────────────────────────────────────────
+const CinematicPortrait = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const proximity = useSpring(0, { stiffness: 50, damping: 20 });
+
+  useAnimationFrame(() => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const mX = mouseX.get();
+    const mY = mouseY.get();
+    
+    if (mX === 0 && mY === 0) return;
+
+    const dist = Math.sqrt(Math.pow(mX - centerX, 2) + Math.pow(mY - centerY, 2));
+    const maxDist = 500;
+    
+    if (dist < maxDist) {
+      proximity.set(1 - dist / maxDist);
+    } else {
+      proximity.set(0);
+    }
+  });
+
+  const imgScale = useTransform(proximity, [0, 1], [1, 1.05]);
+  const glowOpacity = useTransform(proximity, [0, 1], [0.2, 0.5]);
+
+  return (
+    <motion.div 
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1.6, ease: [0.25, 1, 0.5, 1], delay: 0.7 }}
+      className="relative flex items-center justify-center pointer-events-none mx-auto lg:ml-auto"
+      style={{ width: 'clamp(260px, 30vw, 360px)', aspectRatio: '3/4' }}
     >
-      {/* Header */}
-      <div className="px-5 py-2.5 flex items-center justify-between"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-        <div className="flex items-center gap-2">
-          <motion.div
-            className="w-[5px] h-[5px] rounded-full bg-[rgba(255,65,35,0.7)]"
-            animate={{ opacity: [0.7, 0.2, 0.7] }}
-            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <span className="font-mono text-[7px] text-primary-700 uppercase tracking-[0.2em]">
-            System Intelligence
-          </span>
+      {/* Background Glow */}
+      <motion.div 
+        className="absolute inset-0 bg-accent blur-[80px]"
+        style={{ opacity: glowOpacity }}
+      />
+      
+      {/* Portrait Container */}
+      <div className="relative w-full h-full overflow-hidden border border-white/10 bg-[#020202]">
+        <motion.img 
+          src="/portrait.png" 
+          alt="Vishwath"
+          style={{ scale: imgScale }}
+          className="w-full h-full object-cover mix-blend-luminosity opacity-80"
+        />
+        
+        {/* Soft Red Overlay for Atmosphere */}
+        <div className="absolute inset-0 bg-accent mix-blend-overlay opacity-30" />
+        
+        {/* Scanlines Overlay */}
+        <div className="absolute inset-0 opacity-[0.15]"
+          style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.2) 3px, rgba(255,255,255,0.2) 4px)' }}
+        />
+        
+        {/* Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
+        
+        {/* Telemetry Accents */}
+        <div className="absolute top-4 left-4 flex gap-2 items-center">
+          <span className="w-[5px] h-[5px] rounded-full bg-accent animate-pulse shadow-[0_0_8px_rgba(255,90,54,0.8)]" />
+          <span className="font-mono text-[7.5px] text-white/50 tracking-[0.2em] uppercase">ID_VERIFIED</span>
         </div>
-        <span className="font-mono text-[6.5px] text-primary-800">04.2</span>
+        
+        <div className="absolute bottom-5 left-5 flex flex-col gap-1">
+          <span className="font-mono text-[10px] text-white/80 tracking-widest uppercase">VISHWATH</span>
+          <span className="font-mono text-[6.5px] text-accent/80 tracking-widest uppercase">SYS.V3_ACTIVE</span>
+        </div>
       </div>
-
-      {/* Philosophy */}
-      <div className="px-5 pt-5 pb-4">
-        <Body
-          className="text-primary-400 font-light max-w-none"
-          style={{ fontSize: '12px', lineHeight: 1.75 } as any}
-        >
-          Multidisciplinary technologist bridging deep infrastructure and cinematic digital interfaces.
-        </Body>
-      </div>
-
-      {/* Separator */}
-      <div className="mx-5 flex items-center gap-3 pb-1">
-        <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.03)' }} />
-        <span className="font-mono text-[6px] text-primary-800 uppercase tracking-widest">Processes</span>
-        <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.03)' }} />
-      </div>
-
-      {/* Process list */}
-      <div className="px-5 pt-2 pb-3">
-        {[
-          { id: '01', label: 'Architectural UI/UX',        active: true },
-          { id: '02', label: 'Frontend & Motion Physics',   active: true },
-          { id: '03', label: 'Systems Infrastructure',      active: true },
-          { id: '04', label: 'Creative Engineering',        active: false },
-        ].map(p => (
-          <div
-            key={p.id}
-            className="flex items-center justify-between py-[5px] group"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.022)' }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-[6.5px] text-primary-800 w-5">{p.id}</span>
-              <span className="text-[11px] font-light text-primary-500 group-hover:text-primary-200 transition-colors duration-700">
-                {p.label}
-              </span>
-            </div>
-            <div className={`w-[5px] h-[5px] rounded-full ${p.active ? 'bg-green-700/60' : 'bg-primary-900'}`} />
-          </div>
-        ))}
-      </div>
-
-      {/* Footer metrics */}
-      <div className="px-5 py-2.5 grid grid-cols-3"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.035)' }}>
-        {[
-          { label: 'Latency', value: '12ms' },
-          { label: 'Uptime',  value: '99.9%' },
-          { label: 'Region',  value: 'EU-W' },
-        ].map(s => (
-          <div key={s.label} className="flex flex-col gap-[3px]">
-            <span className="font-mono text-[5.5px] text-primary-800 uppercase tracking-widest">{s.label}</span>
-            <span className="font-mono text-[8.5px] text-primary-400">{s.value}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Corner marks */}
-      <div className="absolute top-0 left-0 w-2 h-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(255,255,255,0.07)' }} />
-      <div className="absolute bottom-0 right-0 w-2 h-2" style={{ borderBottom: '1px solid rgba(255,65,35,0.2)', borderRight: '1px solid rgba(255,65,35,0.2)' }} />
-    </div>
-  </motion.div>
-);
-
-// ─── Bottom Anchor ─────────────────────────────────────────────────────────────
-const BottomAnchor = () => (
-  <div className="absolute z-[20] bottom-0 left-0 right-0 flex justify-between items-end px-[5%] pb-8 pointer-events-none select-none">
-    {/* Year — in foreground, overlapping the bg typography, adding depth collision */}
-    <motion.div
-      className="font-black leading-none tracking-tighter text-white"
-      style={{
-        fontSize: 'clamp(3.8rem, 9vw, 11rem)',
-        mixBlendMode: 'screen',
-      }}
-      animate={{ opacity: [0.028, 0.052, 0.028] }}
-      transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut' }}
-    >
-      2026
+      
+      {/* Framing Brackets */}
+      <div className="absolute -top-3 -left-3 w-6 h-6 border-t border-l border-white/20" />
+      <div className="absolute -top-3 -right-3 w-6 h-6 border-t border-r border-white/20" />
+      <div className="absolute -bottom-3 -left-3 w-6 h-6 border-b border-l border-white/20" />
+      <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b border-r border-white/20" />
     </motion.div>
+  );
+};
 
-    <div className="hidden md:flex flex-col gap-0.5 text-right pb-1">
-      <span className="font-mono text-[6.5px] text-primary-800 uppercase">
-        MEM <span className="text-primary-700 ml-1">4096 MB</span>
-      </span>
-      <span className="font-mono text-[6.5px] text-primary-800 uppercase">
-        PROC <span className="text-primary-700 ml-1">0x2E4A</span>
-      </span>
-    </div>
-  </div>
-);
+// ─── Non-Blocking Lightweight Intro ────────────────────────────────────────────
+const LightweightIntro = () => {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(false), 1400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[9999] pointer-events-none flex flex-col items-center justify-center bg-[#020202]"
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 0 }}
+      transition={{ duration: 0.4, delay: 0.9, ease: 'easeInOut' }}
+    >
+      <div className="absolute inset-0 opacity-[0.02]"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.06) 3px, rgba(255,255,255,0.06) 4px)' }}
+      />
+      
+      <div className="flex flex-col items-center gap-2">
+        <motion.span
+          className="font-mono text-[9px] tracking-[0.4em] text-accent/80 uppercase"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3, ease: 'easeOut' }}
+        >
+          Identity Verified
+        </motion.span>
+        <motion.span
+          className="font-mono text-[8px] tracking-[0.35em] text-white/40 uppercase"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4, ease: 'easeOut' }}
+        >
+          Initializing Personal Systems
+        </motion.span>
+      </div>
+    </motion.div>
+  );
+};
 
 // ─── Root ──────────────────────────────────────────────────────────────────────
 export const Hero = () => {
@@ -514,35 +503,118 @@ export const Hero = () => {
     offset: ['start start', 'end start'],
   });
 
-  // Typography parallaxes slower than panels — creates depth separation on scroll
-  const yTypo = useTransform(scrollYProgress, [0, 1], [0, -130]);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    mouseX.set(e.clientX);
+    mouseY.set(e.clientY);
+  };
+
   const opacityAll = useTransform(scrollYProgress, [0, 0.72], [1, 0]);
 
   return (
     <section
       ref={sectionRef}
+      onMouseMove={handleMouseMove}
       className="relative w-full overflow-hidden"
       style={{ height: '100svh', minHeight: 700 }}
     >
+      {/* ── NON-BLOCKING BOOT SEQUENCE OVERLAY ── */}
+      <LightweightIntro />
+
       {/* ── LAYER 0: Directional volumetric fog atmosphere ── */}
-      <Atmosphere />
+      <motion.div
+        initial={{ opacity: 0.1 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2.5, ease: 'easeInOut' }}
+        className="absolute inset-0 z-0 pointer-events-none"
+      >
+        <Atmosphere />
+      </motion.div>
 
       <motion.div style={{ opacity: opacityAll }} className="absolute inset-0">
-        {/* ── LAYER 1: Architectural background typography ── */}
-        <ArchitecturalTypography y={yTypo} />
-
         {/* ── LAYER 1.5: Slow-drifting atmospheric haze ── */}
-        <DriftingHaze />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 3, delay: 0.5, ease: 'easeInOut' }}
+        >
+          <DriftingHaze />
+        </motion.div>
 
         {/* ── LAYER 2: Directional ambient particle field ── */}
-        <AmbientParticles />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, delay: 0.2, ease: 'easeInOut' }}
+        >
+          <AmbientParticles />
+        </motion.div>
 
-        {/* ── LAYER 2.5: Atmospheric pulse — the cinematic moment ── */}
-        <AtmosphericPulse />
+        {/* ── LAYER 2.5: Atmospheric pulse ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, delay: 0.4, ease: 'easeInOut' }}
+        >
+          <AtmosphericPulse />
+        </motion.div>
 
-        {/* ── LAYER 3: Intelligence panel, embedded in environment ── */}
-        <IntelligencePanel />
-        <BottomAnchor />
+        {/* ── LAYER 3: Foreground Content Grid ── */}
+        <div className="absolute inset-0 z-[20] flex flex-col justify-center px-8 md:px-12 lg:px-24 pointer-events-auto">
+          <div className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            {/* LEFT SIDE: Typography */}
+            <div className="lg:col-span-8 flex flex-col gap-8 md:gap-10">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.05, ease: 'easeOut' }}
+                className="flex items-center gap-3"
+              >
+                <div className="w-[5px] h-[5px] bg-accent/80 rounded-full animate-pulse shadow-[0_0_8px_rgba(255,90,54,0.6)]" />
+                <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/50">
+                  Personal Operating System / V3
+                </span>
+              </motion.div>
+
+              <InteractiveHeadline mouseX={mouseX} mouseY={mouseY} />
+
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+                className="max-w-md lg:mt-4 flex flex-col gap-6"
+              >
+                <div className="flex flex-col gap-2">
+                  <span className="text-accent/90 font-mono text-[10px] tracking-widest uppercase">
+                    Creative Designer & Developer
+                  </span>
+                  <Body className="text-white/40 font-light" style={{ fontSize: '15px', lineHeight: 1.7 } as any}>
+                    Building cinematic interfaces, scalable systems, and precision-engineered digital experiences.
+                  </Body>
+                </div>
+                
+                {/* Domain Tags */}
+                <div className="flex flex-wrap gap-4 mt-2">
+                  {['SYSTEM DESIGN', 'ARCHITECTURE', 'PAYMENTS', 'DEVOPS', 'AI SYSTEMS'].map((tag) => (
+                    <div key={tag} className="flex items-center gap-2 opacity-60">
+                      <span className="w-1 h-1 bg-accent/40" />
+                      <span className="font-mono text-[8.5px] tracking-[0.2em] text-white/50 uppercase">{tag}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+
+            {/* RIGHT SIDE: Cinematic Portrait */}
+            <div className="lg:col-span-4 flex justify-center lg:justify-end mt-16 lg:mt-0">
+              <CinematicPortrait mouseX={mouseX} mouseY={mouseY} />
+            </div>
+
+          </div>
+        </div>
       </motion.div>
 
       {/* ── LAYER 3.5: Left architectural shadow anchor ── */}

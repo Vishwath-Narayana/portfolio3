@@ -1,6 +1,6 @@
-import { motion, useScroll, useTransform, animate, useMotionValue, useSpring } from 'framer-motion';
+import { motion, animate } from 'framer-motion';
 import { Mono } from '../ui/Typography';
-import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo, memo } from 'react';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -66,9 +66,9 @@ const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const INTENSITY_STYLES: Record<number, { bg: string; glow: string; label: string }> = {
   0: { bg: 'rgba(255,255,255,0.03)', glow: 'none', label: 'No activity' },
   1: { bg: 'rgba(255,90,54,0.18)',   glow: 'none', label: 'Light activity' },
-  2: { bg: 'rgba(255,90,54,0.42)',   glow: '0 0 4px rgba(255,90,54,0.3)', label: 'Moderate activity' },
-  3: { bg: 'rgba(255,90,54,0.68)',   glow: '0 0 7px rgba(255,90,54,0.5)', label: 'High activity' },
-  4: { bg: 'rgba(255,120,70,0.92)',  glow: '0 0 12px rgba(255,90,54,0.7)', label: 'Intense activity' },
+  2: { bg: 'rgba(255,90,54,0.42)',   glow: 'none', label: 'Moderate activity' },
+  3: { bg: 'rgba(255,90,54,0.68)',   glow: 'none', label: 'High activity' },
+  4: { bg: 'rgba(255,120,70,0.92)',  glow: '0 0 8px rgba(255,90,54,0.4)', label: 'Intense activity' },
 };
 
 // ─── Metric Row ──────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ interface MetricRowProps {
   highlight?: boolean;
 }
 
-const MetricRow = ({ label, value, status = 'none', delay = 0, highlight = false }: MetricRowProps) => {
+const MetricRow = memo(({ label, value, status = 'none', delay = 0, highlight = false }: MetricRowProps) => {
   const dotColors: Record<string, string> = {
     active:   '#22c55e',
     idle:     '#a1a1aa',
@@ -133,7 +133,8 @@ const MetricRow = ({ label, value, status = 'none', delay = 0, highlight = false
       </span>
     </motion.div>
   );
-};
+});
+MetricRow.displayName = 'MetricRow';
 
 // ─── Activity Cell ────────────────────────────────────────────────────────────
 
@@ -142,56 +143,43 @@ interface CellProps {
   isRecent: boolean;
   weekIndex: number;
   dayIndex: number;
-  onHover: (info: { week: number; day: number; intensity: number; x: number; y: number } | null) => void;
-  animDelay: number;
+  onHover: (info: TooltipInfo | null) => void;
 }
 
-const ActivityCell = ({ intensity, isRecent, weekIndex, dayIndex, onHover, animDelay }: CellProps) => {
+const ActivityCell = memo(({ intensity, isRecent, weekIndex, dayIndex, onHover }: CellProps) => {
   const style = INTENSITY_STYLES[intensity];
-  const [entered, setEntered] = useState(false);
-  // isNow = the very last week
   const isNow = weekIndex === WEEKS - 1;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.5 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.25, delay: animDelay, ease: 'easeOut' }}
+    <div
       onMouseEnter={(e) => {
-        setEntered(true);
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         onHover({ week: weekIndex, day: dayIndex, intensity, x: rect.left + rect.width / 2, y: rect.top });
       }}
       onMouseLeave={() => {
-        setEntered(false);
         onHover(null);
       }}
-      className="rounded-[2px] cursor-pointer"
+      className="rounded-[2px] cursor-pointer transition-all duration-150 hover:scale-125 hover:!bg-[#FF7850] hover:!shadow-[0_0_12px_rgba(255,90,54,0.7)] hover:z-20 relative"
       style={{
         width: '100%',
         paddingBottom: '100%',
-        position: 'relative',
-        background: entered ? 'rgba(255,120,80,0.95)' : style.bg,
-        boxShadow: entered
-          ? '0 0 16px rgba(255,90,54,0.75)'
-          : style.glow,
-        transform: entered ? 'scale(1.4)' : 'scale(1)',
-        transition: 'background 80ms ease, box-shadow 80ms ease, transform 100ms ease',
+        background: style.bg,
+        boxShadow: style.glow,
         outline: isNow && dayIndex === 0 ? '1px solid rgba(255,90,54,0.35)' : 'none',
         outlineOffset: '1px',
       }}
     >
       {/* Pulse ring on recent high-intensity cells */}
-      {isRecent && intensity >= 3 && !entered && (
+      {isRecent && intensity >= 3 && (
         <span
-          className="absolute inset-0 rounded-[2px] animate-ping"
-          style={{ background: 'rgba(255,90,54,0.22)', animationDuration: '3s' }}
+          className="absolute inset-0 rounded-[2px] animate-pulse"
+          style={{ background: 'rgba(255,90,54,0.18)', animationDuration: '3s' }}
         />
       )}
-    </motion.div>
+    </div>
   );
-};
+});
+ActivityCell.displayName = 'ActivityCell';
 
 // ─── Tooltip ─────────────────────────────────────────────────────────────────
 
@@ -247,7 +235,7 @@ const HoverTooltip = ({ info }: { info: TooltipInfo }) => (
 
 // ─── Scrolling Activity Bars (mini timeline) ──────────────────────────────────
 
-const ActivitySparkline = ({ data }: { data: number[][] }) => {
+const ActivitySparkline = memo(({ data }: { data: number[][] }) => {
   // Aggregate weekly totals for last 24 weeks
   const weeklyTotals = useMemo(() => {
     return data.slice(-24).map(week => week.reduce((a, b) => a + b, 0));
@@ -289,7 +277,8 @@ const ActivitySparkline = ({ data }: { data: number[][] }) => {
       </div>
     </div>
   );
-};
+});
+ActivitySparkline.displayName = 'ActivitySparkline';
 
 // ─── Legend ──────────────────────────────────────────────────────────────────
 
@@ -348,8 +337,25 @@ const AnimatedCounter = ({ target, suffix = '' }: { target: number; suffix?: str
 
 export const Infrastructure = () => {
   const containerRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start end', 'end start'] });
-  const panelY = useTransform(scrollYProgress, [0, 1], [20, -20]);
+  // Parallax removed for scroll performance
+
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: any;
+    const handleScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const activityData = useMemo(() => generateActivity(), []);
   const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
@@ -392,12 +398,12 @@ export const Infrastructure = () => {
           {/* subtle horizontal telemetry connector lines */}
           <div className="absolute bottom-[-1px] left-0 w-full h-[1px] z-0 pointer-events-none flex" style={{ opacity: 0.6 }}>
             <motion.div
-              className="h-full bg-accent/40"
-              initial={{ width: 0 }}
-              whileInView={{ width: '100%' }}
+              className="h-full bg-accent/40 origin-left"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 1.5, ease: 'easeInOut' }}
-              style={{ maxWidth: '40%' }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              style={{ width: '40%' }}
             />
             <div className="h-full w-full bg-gradient-to-r from-accent/40 via-white/10 to-transparent" />
           </div>
@@ -432,22 +438,24 @@ export const Infrastructure = () => {
         </div>
 
         {/* ── Split Layout: Unified Telemetry System ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+          className="mt-8 md:mt-12 flex flex-col rounded bg-white/[0.012] border border-white/[0.05] overflow-hidden relative shadow-[0_4px_30px_rgba(0,0,0,0.4)]"
+        >
+          {/* Shared top scanning line indicator */}
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-accent/10 via-accent/40 to-accent/10 opacity-60" />
 
-          {/* ─── LEFT: Build Activity Panel ─── */}
-          <motion.div
-            style={{ y: panelY }}
-            initial={{ opacity: 0, x: -16 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-4 flex flex-col rounded bg-white/[0.012] border border-white/[0.05] overflow-hidden relative backdrop-blur-sm"
-          >
-            {/* Top scanning line indicator */}
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent/20 to-transparent opacity-50" />
+          {/* Unified Core Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
 
-            {/* Metrics panel */}
-            <div className="p-5 flex flex-col relative z-10 border-b border-white/[0.03] bg-white/[0.005]">
+            {/* ─── LEFT: Build Activity Panel ─── */}
+            <div className="lg:col-span-4 flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.02] bg-black/20">
+
+              {/* Metrics panel */}
+              <div className="p-5 flex flex-col relative z-10 border-b border-white/[0.02] bg-white/[0.005]">
               <div className="flex justify-between items-center pb-4 mb-1 border-b border-white/[0.04]">
                 <span className="font-mono text-[8px] tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
                   system_status_&_activity
@@ -473,7 +481,7 @@ export const Infrastructure = () => {
             </div>
 
             {/* Timeline reference callouts */}
-            <div className="p-5 flex flex-col gap-4 bg-white/[0.005]">
+            <div className="p-5 flex flex-col gap-4 bg-white/[0.005] flex-grow">
               <span className="font-mono text-[8px] tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
                 Timeline Reference
               </span>
@@ -505,29 +513,27 @@ export const Infrastructure = () => {
               ))}
             </div>
 
-          </motion.div>
+            </div>
 
-          {/* ─── RIGHT: Main Telemetry Wall ─── */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
-            className="lg:col-span-8 flex flex-col rounded bg-white/[0.012] border border-white/[0.05] overflow-hidden relative shadow-[0_0_80px_rgba(255,90,54,0.02)] backdrop-blur-sm"
-          >
-            {/* Top scanning line indicator */}
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-accent/10 via-accent/40 to-accent/10 opacity-60" />
+            {/* ─── RIGHT: Main Telemetry Wall ─── */}
+            <div className="lg:col-span-8 flex flex-col bg-black/10">
 
-            {/* Heatmap Panel */}
-            <div className="flex flex-col relative z-10 border-b border-white/[0.04] bg-white/[0.005]">
-              <div className="flex justify-between items-center px-5 py-4 border-b border-white/[0.04]">
+              {/* Heatmap Panel */}
+              <div className="flex flex-col relative z-10 border-b border-white/[0.02] bg-white/[0.005]">
+                <div className="flex justify-between items-center px-5 py-4 border-b border-white/[0.02]">
                 <span className="font-mono text-[8px] tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
                   contribution_map · github_activity · 2025–2026
                 </span>
                 <HeatmapLegend />
               </div>
 
-              <div className="p-5 overflow-x-auto">
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className={`p-5 overflow-x-auto ${isScrolling ? 'pointer-events-none' : ''}`}
+              >
                 {/* Month labels */}
                 <div className="flex mb-1.5" style={{ paddingLeft: 22 }}>
                   {Array.from({ length: WEEKS }).map((_, w) => {
@@ -585,8 +591,7 @@ export const Infrastructure = () => {
                             isRecent={w >= recentThreshold}
                             weekIndex={w}
                             dayIndex={d}
-                            onHover={info => setTooltip(info ? { ...info, week: w, day: d } : null)}
-                            animDelay={Math.min(w * 0.007 + d * 0.002, 0.5)}
+                            onHover={setTooltip}
                           />
                         ))}
                       </div>
@@ -603,7 +608,7 @@ export const Infrastructure = () => {
                     Longest streak: <span className="text-accent/60">146 days</span>
                   </span>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* ── Mini Stat Cards Row ── */}
@@ -630,7 +635,7 @@ export const Infrastructure = () => {
             </div>
 
             {/* ── Ambient Signal Strip & Engineering Momentum ── */}
-            <div className="flex flex-col p-5 bg-white/[0.008]">
+            <div className="flex flex-col p-5 bg-white/[0.008] flex-grow">
               {/* Signal Strip Header */}
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-white/[0.04]">
                 <div className="flex items-center gap-3">
@@ -644,47 +649,94 @@ export const Infrastructure = () => {
                 </span>
               </div>
 
-              {/* Animated Waveform Graph (increased height to h-28) */}
-              <div className="relative w-full h-28 overflow-hidden mb-4 rounded border border-white/[0.03] bg-black/40">
+              {/* Animated Waveform Graph (increased height to prevent cropping, organic motion) */}
+              <div className={`relative w-full h-36 overflow-hidden mb-4 rounded border border-white/[0.03] bg-black/40 transition-opacity duration-300 ${isScrolling ? 'opacity-40' : 'opacity-100'}`}>
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:10%_25%] pointer-events-none" />
-                <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 200 40">
-                  <motion.path
-                    d="M 0 35 Q 15 25 25 30 T 45 15 T 65 30 T 85 10 T 105 20 T 125 15 T 145 25 T 165 5 T 185 20 T 200 10 L 200 40 L 0 40 Z"
-                    fill="url(#momentum-grad)"
-                    initial={{ opacity: 0.3 }}
-                    animate={{ opacity: 0.6 }}
-                    transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-                  />
-                  <motion.path
-                    d="M 0 35 Q 15 25 25 30 T 45 15 T 65 30 T 85 10 T 105 20 T 125 15 T 145 25 T 165 5 T 185 20 T 200 10"
-                    fill="none"
-                    stroke="rgba(255,90,54,0.4)"
-                    strokeWidth="0.5"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 2.5, ease: "easeOut" }}
-                  />
-                  <motion.circle
-                    r="1.5"
-                    fill="#FF5A36"
-                    filter="url(#glow-momentum)"
-                    animate={{
-                       cx: [0, 15, 25, 45, 65, 85, 105, 125, 145, 165, 185, 200],
-                       cy: [35, 25, 30, 15, 30, 10, 20, 15, 25, 5, 20, 10]
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  />
+                <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 200 80">
                   <defs>
-                    <linearGradient id="momentum-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgba(255,90,54,0.25)" />
+                    <linearGradient id="wave-grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgba(255,90,54,0.3)" />
                       <stop offset="100%" stopColor="rgba(255,90,54,0)" />
                     </linearGradient>
-                    <filter id="glow-momentum">
-                      <feGaussianBlur stdDeviation="1.5" result="blur" />
-                      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-                    </filter>
                   </defs>
+
+                  {/* Background filled wave */}
+                  <motion.path
+                    fill="url(#wave-grad)"
+                    d="M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30 L 200 80 L 0 80 Z"
+                    initial={{ d: "M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30 L 200 80 L 0 80 Z" }}
+                    animate={{
+                      d: [
+                        "M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30 L 200 80 L 0 80 Z",
+                        "M 0 45 Q 20 50 40 30 T 80 50 T 120 35 T 160 25 T 200 40 L 200 80 L 0 80 Z",
+                        "M 0 35 Q 20 30 40 45 T 80 20 T 120 45 T 160 30 T 200 50 L 200 80 L 0 80 Z",
+                        "M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30 L 200 80 L 0 80 Z"
+                      ]
+                    }}
+                    transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{ opacity: 0.6 }}
+                  />
+                  
+                  {/* Primary wave stroke */}
+                  <motion.path
+                    fill="none"
+                    stroke="rgba(255,90,54,0.5)"
+                    strokeWidth="0.75"
+                    d="M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30"
+                    initial={{ d: "M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30" }}
+                    animate={{
+                      d: [
+                        "M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30",
+                        "M 0 45 Q 20 50 40 30 T 80 50 T 120 35 T 160 25 T 200 40",
+                        "M 0 35 Q 20 30 40 45 T 80 20 T 120 45 T 160 30 T 200 50",
+                        "M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30"
+                      ]
+                    }}
+                    transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                  
+                  {/* Secondary jitter wave stroke */}
+                  <motion.path
+                    fill="none"
+                    stroke="rgba(255,255,255,0.15)"
+                    strokeWidth="0.5"
+                    d="M 0 35 Q 20 30 40 45 T 80 20 T 120 45 T 160 30 T 200 50"
+                    initial={{ d: "M 0 35 Q 20 30 40 45 T 80 20 T 120 45 T 160 30 T 200 50" }}
+                    animate={{
+                      d: [
+                        "M 0 35 Q 20 30 40 45 T 80 20 T 120 45 T 160 30 T 200 50",
+                        "M 0 40 Q 20 20 40 35 T 80 40 T 120 25 T 160 45 T 200 30",
+                        "M 0 45 Q 20 50 40 30 T 80 50 T 120 35 T 160 25 T 200 40",
+                        "M 0 35 Q 20 30 40 45 T 80 20 T 120 45 T 160 30 T 200 50"
+                      ]
+                    }}
+                    transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                  {/* Occasional Micro Spikes (rendered only when stationary) */}
+                  {!isScrolling && (
+                    <>
+                      <motion.path
+                        fill="none"
+                        stroke="rgba(255,90,54,0.8)"
+                        strokeWidth="1"
+                        d="M 100 80 L 100 20"
+                        initial={{ opacity: 0, scaleY: 0 }}
+                        animate={{ opacity: [0, 1, 0], scaleY: [0, 1, 0] }}
+                        transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 4.5, ease: 'circOut' }}
+                        style={{ transformOrigin: 'bottom' }}
+                      />
+                      <motion.path
+                        fill="none"
+                        stroke="rgba(255,90,54,0.8)"
+                        strokeWidth="1"
+                        d="M 140 80 L 140 10"
+                        initial={{ opacity: 0, scaleY: 0 }}
+                        animate={{ opacity: [0, 1, 0], scaleY: [0, 1, 0] }}
+                        transition={{ duration: 0.3, repeat: Infinity, repeatDelay: 7.2, ease: 'circOut' }}
+                        style={{ transformOrigin: 'bottom' }}
+                      />
+                    </>
+                  )}
                 </svg>
                 <div className="absolute top-2 left-3 font-mono text-[7px] text-white/30 uppercase tracking-widest">
                   Commit Intensity Trend
@@ -692,7 +744,7 @@ export const Infrastructure = () => {
               </div>
 
               {/* Build Logs */}
-              <div className="flex flex-col gap-2.5 font-mono text-[9px] tracking-wide text-white/45 pl-1 border-l border-accent/20">
+              <div className="flex flex-col gap-2.5 font-mono text-[9px] tracking-wide text-white/45 pl-1 border-l border-accent/20 pb-4">
                 <div className="flex items-start gap-4 hover:text-white/70 transition-colors ml-2">
                   <span className="text-accent/70">23:41</span>
                   <span>[SYS] deployed portfolio v3 edge network</span>
@@ -711,10 +763,13 @@ export const Infrastructure = () => {
                 </div>
               </div>
 
+              </div>
             </div>
+
+          </div>
+
           </motion.div>
         </div>
-      </div>
-    </section>
-  );
-};
+      </section>
+    );
+  };
