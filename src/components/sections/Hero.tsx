@@ -77,76 +77,149 @@ const AmbientParticles = () => {
 };
 
 // ─── Atmosphere ────────────────────────────────────────────────────────────────
-// Asymmetric: bloom originates lower-left where the typographic mass is heaviest.
-// This creates natural visual gravity and breaks perfect symmetry.
+// Asymmetric directional volumetric fog — NOT a circular bloom.
+// Multiple elongated haze layers at different angles create
+// environmental depth illumination rather than a hero-gradient cliché.
 const Atmosphere = () => (
   <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
     <div className="absolute inset-0 bg-[#030303]" />
 
-    {/* Structural fine grid */}
+    {/* Fine structural grid — slightly faded toward right edge */}
     <div className="absolute inset-0"
       style={{
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.026) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px)',
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.024) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.024) 1px, transparent 1px)',
         backgroundSize: '88px 88px',
+        WebkitMaskImage: 'linear-gradient(to right, rgba(255,255,255,1) 30%, rgba(255,255,255,0.4) 100%)',
+        maskImage: 'linear-gradient(to right, rgba(255,255,255,1) 30%, rgba(255,255,255,0.4) 100%)',
       }}
     />
 
-    {/* Coarse structural grid — slightly brighter at intersections */}
+    {/* Coarse architectural grid */}
     <div className="absolute inset-0"
       style={{
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.048) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.048) 1px, transparent 1px)',
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)',
         backgroundSize: '352px 352px',
       }}
     />
 
-    {/* Primary bloom — LOWER LEFT, asymmetric. This is the scene's light source. */}
+    {/* PRIMARY FOG: diagonal haze rising from lower-left — the main light source.
+        An elongated ellipse rotated ~35° acts like a cinematic key light. */}
     <motion.div
       className="absolute"
       style={{
-        width: '140vw', height: '130vh',
-        left: '-15%', bottom: '-20%',
-        background: 'radial-gradient(ellipse at 30% 70%, rgba(255,52,22,0.09) 0%, rgba(255,40,15,0.04) 35%, rgba(255,25,8,0.015) 60%, transparent 75%)',
+        width: '160vw', height: '60vh',
+        left: '-30%', bottom: '-5%',
+        background: 'linear-gradient(135deg, rgba(255,52,20,0.11) 0%, rgba(255,38,12,0.05) 40%, transparent 70%)',
+        filter: 'blur(70px)',
+        transform: 'rotate(-18deg)',
+        transformOrigin: 'left bottom',
+      }}
+      animate={{ opacity: [0.7, 1.05, 0.7] }}
+      transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut' }}
+    />
+
+    {/* SECONDARY FOG: horizontal haze across bottom third — ground warmth */}
+    <motion.div
+      className="absolute bottom-0 left-0 right-0"
+      style={{
+        height: '45vh',
+        background: 'linear-gradient(to top, rgba(255,45,15,0.05) 0%, rgba(255,35,10,0.02) 50%, transparent 100%)',
+        filter: 'blur(50px)',
+      }}
+      animate={{ opacity: [0.6, 0.9, 0.6] }}
+      transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 5 }}
+    />
+
+    {/* COUNTER-BALANCE: very faint cool haze upper-right — creates tonal depth */}
+    <div
+      className="absolute"
+      style={{
+        width: '50vw', height: '40vh',
+        right: 0, top: 0,
+        background: 'linear-gradient(225deg, rgba(180,185,200,0.018) 0%, transparent 65%)',
         filter: 'blur(60px)',
-        borderRadius: '50%',
       }}
-      animate={{ opacity: [0.75, 1.1, 0.75] }}
-      transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
     />
 
-    {/* Secondary glow — upper center for counter-balance, much dimmer */}
-    <motion.div
-      className="absolute"
-      style={{
-        width: '60vw', height: '50vh',
-        left: '30%', top: '-5%',
-        background: 'radial-gradient(ellipse at center, rgba(255,60,30,0.025) 0%, transparent 65%)',
-        filter: 'blur(80px)',
-        borderRadius: '50%',
-      }}
-      animate={{ opacity: [0.6, 1, 0.6] }}
-      transition={{ duration: 34, repeat: Infinity, ease: 'easeInOut', delay: 10 }}
-    />
-
-    {/* Deep asymmetric vignette — heavier on right, lighter where the bloom is */}
+    {/* Deep asymmetric vignette: heavier right and top, open lower-left */}
     <div className="absolute inset-0"
       style={{
         background: `
-          radial-gradient(ellipse 110% 100% at 20% 75%, transparent 25%, rgba(3,3,3,0.75) 80%),
-          linear-gradient(to right, transparent 0%, rgba(3,3,3,0.7) 100%)
+          radial-gradient(ellipse 115% 105% at 18% 78%, transparent 22%, rgba(3,3,3,0.72) 78%),
+          linear-gradient(to right, transparent 10%, rgba(3,3,3,0.65) 100%)
         `,
       }}
     />
 
-    {/* Foreground depth vignette — thin dark bands at screen edges */}
+    {/* Edge fades */}
     <div className="absolute inset-0"
       style={{
-        background: 'linear-gradient(to bottom, rgba(3,3,3,0.5) 0%, transparent 12%, transparent 80%, rgba(3,3,3,0.65) 100%)',
+        background: 'linear-gradient(to bottom, rgba(3,3,3,0.55) 0%, transparent 14%, transparent 78%, rgba(3,3,3,0.7) 100%)',
       }}
     />
 
-    {/* Barely visible horizontal CRT texture */}
-    <div className="absolute inset-0 opacity-[0.014]"
+    {/* CRT scanlines — barely perceptible */}
+    <div className="absolute inset-0 opacity-[0.013]"
       style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,1) 3px, rgba(0,0,0,1) 4px)' }}
+    />
+  </div>
+);
+
+// ─── Drifting Haze ─────────────────────────────────────────────────────────────
+// A single cinematic motion layer: two large blurred divs drift slowly across
+// the scene at different speeds. Imperceptible as animation, felt as atmosphere.
+const DriftingHaze = () => (
+  <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden">
+    <motion.div
+      className="absolute"
+      style={{
+        width: '80vw', height: '80vh',
+        left: '5%', top: '10%',
+        background: 'radial-gradient(ellipse at 40% 60%, rgba(255,50,18,0.03) 0%, transparent 65%)',
+        filter: 'blur(90px)',
+        borderRadius: '60% 40% 50% 50% / 50% 50% 40% 60%',
+      }}
+      animate={{ x: [0, 40, 0], y: [0, -20, 0] }}
+      transition={{ duration: 50, repeat: Infinity, ease: 'easeInOut' }}
+    />
+    <motion.div
+      className="absolute"
+      style={{
+        width: '60vw', height: '60vh',
+        right: '10%', bottom: '15%',
+        background: 'radial-gradient(ellipse at 55% 45%, rgba(255,40,12,0.02) 0%, transparent 60%)',
+        filter: 'blur(100px)',
+        borderRadius: '40% 60% 60% 40% / 60% 40% 60% 40%',
+      }}
+      animate={{ x: [0, -30, 0], y: [0, 25, 0] }}
+      transition={{ duration: 65, repeat: Infinity, ease: 'easeInOut', delay: 12 }}
+    />
+  </div>
+);
+
+// ─── Left Architectural Shadow ──────────────────────────────────────────────────
+// A subtle structural presence on the left that creates compositional
+// weight without being a UI element. Reads as a deep architectural column
+// or building edge — the same cinematic language as film noir.
+const LeftArchitecturalAnchor = () => (
+  <div className="absolute inset-0 z-[6] pointer-events-none overflow-hidden hidden lg:block">
+    {/* Main shadow column */}
+    <div
+      className="absolute top-0 bottom-0"
+      style={{
+        left: 0,
+        width: '14vw',
+        background: 'linear-gradient(to right, rgba(3,3,3,0.82) 0%, rgba(3,3,3,0.45) 45%, rgba(3,3,3,0.12) 75%, transparent 100%)',
+      }}
+    />
+    {/* Faint vertical edge line — structural seam */}
+    <div
+      className="absolute top-[8%] bottom-[8%]"
+      style={{
+        left: '13vw',
+        width: '1px',
+        background: 'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 80%, transparent 100%)',
+      }}
     />
   </div>
 );
@@ -193,99 +266,117 @@ const AtmosphericPulse = () => (
 );
 
 // ─── Foreground Depth ──────────────────────────────────────────────────────────
-// Dark architectural forms at the very front — they silhouette the scene.
-// These create a cinematic "window into a space" rather than a flat screen.
+// Foreground framing elements that sit in front of all content,
+// creating the sense of looking into a deep spatial environment.
 const ForegroundDepth = () => (
   <div className="absolute inset-0 z-[25] pointer-events-none">
-    {/* Left vertical dark column — feels like a building edge framing the scene */}
+    {/* Left column — primary foreground frame, heavier now */}
     <div
       className="absolute top-0 bottom-0 left-0"
-      style={{ width: '6vw', background: 'linear-gradient(to right, rgba(3,3,3,0.88) 0%, rgba(3,3,3,0.4) 60%, transparent 100%)' }}
+      style={{
+        width: '9vw',
+        background: 'linear-gradient(to right, rgba(3,3,3,0.92) 0%, rgba(3,3,3,0.55) 50%, rgba(3,3,3,0.15) 80%, transparent 100%)',
+      }}
     />
-    {/* Bottom atmospheric fog — ground-level depth */}
+    {/* Right column — lighter, doesn't compete with panel */}
+    <div
+      className="absolute top-0 bottom-0 right-0"
+      style={{
+        width: '4vw',
+        background: 'linear-gradient(to left, rgba(3,3,3,0.7) 0%, transparent 100%)',
+      }}
+    />
+    {/* Bottom ground fog */}
     <div
       className="absolute left-0 right-0 bottom-0"
-      style={{ height: '18vh', background: 'linear-gradient(to top, rgba(3,3,3,0.75) 0%, transparent 100%)' }}
+      style={{ height: '22vh', background: 'linear-gradient(to top, rgba(3,3,3,0.8) 0%, rgba(3,3,3,0.2) 60%, transparent 100%)' }}
     />
-    {/* Top fade — subtle, prevents harsh viewport edge */}
+    {/* Top fade */}
     <div
       className="absolute left-0 right-0 top-0"
-      style={{ height: '10vh', background: 'linear-gradient(to bottom, rgba(3,3,3,0.6) 0%, transparent 100%)' }}
+      style={{ height: '12vh', background: 'linear-gradient(to bottom, rgba(3,3,3,0.65) 0%, transparent 100%)' }}
     />
   </div>
 );
 
 // ─── Architectural Typography ──────────────────────────────────────────────────
-// The true hero. Each word exists at a different opacity level — simulating
-// depth and partial illumination from the lower-left bloom. Words extend
-// beyond viewport edges, get aggressively cropped, and fade into darkness.
-// This IS the composition's emotional mass.
+// Each word is individually tuned for opacity AND blur — creating genuine
+// atmospheric depth rather than just transparency variation.
+// BUILDING is closest (sharpest, brightest). ALIVE. is deepest (blurred, near-invisible).
 const ArchitecturalTypography = ({ y }: { y: any }) => (
   <motion.div
     className="absolute pointer-events-none select-none z-[2]"
     style={{ top: '-2%', left: '-1%', right: 0, y }}
   >
-    <motion.div
-      className="font-black text-[#E8E2DF] overflow-hidden"
+    <div
+      className="font-black text-[#EAE5E1] overflow-visible"
       style={{
-        fontSize: 'clamp(5rem, 17.5vw, 24rem)',
-        lineHeight: 0.82,
-        letterSpacing: '-0.03em',
+        fontSize: 'clamp(5.2rem, 18vw, 25rem)',
+        lineHeight: 0.8,
+        letterSpacing: '-0.035em',
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
       }}
-      animate={{ opacity: [1, 1, 1] }} // base container stays constant; per-line varies
     >
-      {/* BUILDING — most visible, anchors the composition */}
+      {/* BUILDING — foreground word. Most visible. No blur. Anchors everything. */}
       <motion.div
-        animate={{ opacity: [0.14, 0.21, 0.14] }}
-        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ opacity: [0.15, 0.24, 0.15] }}
+        transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut' }}
       >
         BUILDING
       </motion.div>
 
-      {/* SYSTEMS — slightly indented, slightly less bright */}
+      {/* SYSTEMS — slight recession. Very subtle blur begins. */}
       <motion.div
-        style={{ paddingLeft: '4%' }}
-        animate={{ opacity: [0.09, 0.15, 0.09] }}
-        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+        style={{
+          paddingLeft: '4%',
+          filter: 'blur(0.3px)',
+        }}
+        animate={{ opacity: [0.085, 0.13, 0.085] }}
+        transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
       >
         SYSTEMS
       </motion.div>
 
-      {/* THAT FEEL — more indented, begins fading toward darkness */}
+      {/* THAT FEEL — mid-depth. Blur increases. Fades toward the dark right vignette. */}
       <motion.div
-        style={{ paddingLeft: '9%' }}
-        animate={{ opacity: [0.055, 0.09, 0.055] }}
-        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+        style={{
+          paddingLeft: '9%',
+          filter: 'blur(0.8px)',
+          WebkitMaskImage: 'linear-gradient(to right, rgba(255,255,255,1) 30%, rgba(255,255,255,0.6) 65%, rgba(255,255,255,0.2) 88%, transparent 100%)',
+          maskImage: 'linear-gradient(to right, rgba(255,255,255,1) 30%, rgba(255,255,255,0.6) 65%, rgba(255,255,255,0.2) 88%, transparent 100%)',
+        }}
+        animate={{ opacity: [0.048, 0.078, 0.048] }}
+        transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
       >
         THAT FEEL
       </motion.div>
 
-      {/* ALIVE. — maximum indent, disappears into the dark right edge */}
+      {/* ALIVE. — deepest distance. Heaviest blur. Almost disappears completely. */}
       <motion.div
         style={{
           paddingLeft: '16%',
-          // Mask: word fades toward the right where the dark vignette is
-          WebkitMaskImage: 'linear-gradient(to right, rgba(255,255,255,1) 40%, rgba(255,255,255,0.3) 75%, transparent 95%)',
-          maskImage: 'linear-gradient(to right, rgba(255,255,255,1) 40%, rgba(255,255,255,0.3) 75%, transparent 95%)',
+          filter: 'blur(1.8px)',
+          WebkitMaskImage: 'linear-gradient(to right, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0.08) 78%, transparent 92%)',
+          maskImage: 'linear-gradient(to right, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0.08) 78%, transparent 92%)',
         }}
-        animate={{ opacity: [0.035, 0.065, 0.035] }}
-        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
+        animate={{ opacity: [0.025, 0.048, 0.025] }}
+        transition={{ duration: 32, repeat: Infinity, ease: 'easeInOut', delay: 9 }}
       >
         ALIVE.
       </motion.div>
-    </motion.div>
+    </div>
   </motion.div>
 );
 
 // ─── Intelligence Panel ────────────────────────────────────────────────────────
-// Positioned right-of-center, slightly inside the atmosphere. Softer borders,
-// blended into the environmental bloom rather than floating above it.
+// Embedded into the atmospheric environment rather than floating above it.
+// The panel uses a very dark semi-transparent bg so the typography bleeds
+// faintly through its left edge. Left bleed gradient ties it to the bg fog.
 const IntelligencePanel = () => (
   <motion.div
     className="absolute z-[20] hidden md:flex flex-col"
     style={{
-      right: '5%',
+      right: '4.5%',
       top: '50%',
       transform: 'translateY(-50%)',
       width: 'clamp(230px, 19vw, 288px)',
@@ -294,11 +385,19 @@ const IntelligencePanel = () => (
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay: 1.6, duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
   >
-    <div
-      className="relative bg-[#030303]/75 backdrop-blur-2xl"
+    {/* Atmospheric bleed — soft fog hazing left edge of panel into the bg */}
+    <div className="absolute -left-8 -top-4 -bottom-4 w-12 pointer-events-none z-0"
       style={{
-        border: '1px solid rgba(255,255,255,0.042)',
-        boxShadow: '0 0 0 1px rgba(255,255,255,0.012), 0 40px 100px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.03)',
+        background: 'linear-gradient(to right, transparent 0%, rgba(255,45,15,0.015) 50%, transparent 100%)',
+        filter: 'blur(8px)',
+      }}
+    />
+    <div
+      className="relative bg-[#020202]/82 backdrop-blur-2xl z-[1]"
+      style={{
+        border: '1px solid rgba(255,255,255,0.032)',
+        borderLeft: '1px solid rgba(255,255,255,0.022)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.008), 0 40px 120px rgba(0,0,0,0.98), inset 1px 0 0 rgba(255,255,255,0.012)',
       }}
     >
       {/* Header */}
@@ -415,8 +514,8 @@ export const Hero = () => {
     offset: ['start start', 'end start'],
   });
 
-  // Typography parallaxes slower than panels — reinforces depth separation
-  const yTypo = useTransform(scrollYProgress, [0, 1], [0, -140]);
+  // Typography parallaxes slower than panels — creates depth separation on scroll
+  const yTypo = useTransform(scrollYProgress, [0, 1], [0, -130]);
   const opacityAll = useTransform(scrollYProgress, [0, 0.72], [1, 0]);
 
   return (
@@ -425,25 +524,31 @@ export const Hero = () => {
       className="relative w-full overflow-hidden"
       style={{ height: '100svh', minHeight: 700 }}
     >
-      {/* ── LAYER 0: Atmosphere, grids, volumetric asymmetric bloom ── */}
+      {/* ── LAYER 0: Directional volumetric fog atmosphere ── */}
       <Atmosphere />
 
       <motion.div style={{ opacity: opacityAll }} className="absolute inset-0">
-        {/* ── LAYER 1: Architectural background typography (true hero) ── */}
+        {/* ── LAYER 1: Architectural background typography ── */}
         <ArchitecturalTypography y={yTypo} />
+
+        {/* ── LAYER 1.5: Slow-drifting atmospheric haze ── */}
+        <DriftingHaze />
 
         {/* ── LAYER 2: Directional ambient particle field ── */}
         <AmbientParticles />
 
-        {/* ── LAYER 2.5: Atmospheric pulse — the "moment" ── */}
+        {/* ── LAYER 2.5: Atmospheric pulse — the cinematic moment ── */}
         <AtmosphericPulse />
 
-        {/* ── LAYER 3: Intelligence panel ── */}
+        {/* ── LAYER 3: Intelligence panel, embedded in environment ── */}
         <IntelligencePanel />
         <BottomAnchor />
       </motion.div>
 
-      {/* ── LAYER 4: Foreground architectural depth (always visible) ── */}
+      {/* ── LAYER 3.5: Left architectural shadow anchor ── */}
+      <LeftArchitecturalAnchor />
+
+      {/* ── LAYER 4: Foreground cinematic depth framing ── */}
       <ForegroundDepth />
     </section>
   );
