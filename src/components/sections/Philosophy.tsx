@@ -20,7 +20,7 @@ export const Philosophy = () => {
   const textOpacity = useTransform(scrollYProgress, [0.15, 0.4], [0.1, 1]);
 
   return (
-    <section ref={containerRef} className="py-32 md:py-48 px-6 md:px-12 lg:px-24 bg-[#0B0B0B] text-primary-900 selection:bg-accent selection:text-white relative overflow-hidden z-10 transition-colors duration-700">
+    <section ref={containerRef} className="py-24 md:py-36 px-6 md:px-12 lg:px-24 bg-[#0B0B0B] text-primary-900 selection:bg-accent selection:text-white relative overflow-hidden z-10 transition-colors duration-700">
       
       {/* Light Surface Layer (Sweeps Down on Scroll) */}
       <motion.div 

@@ -47,7 +47,7 @@ export const Evolution = () => {
   const scaleY = useTransform(scrollYProgress, [0.05, 0.95], [0, 1]);
 
   return (
-    <section ref={containerRef} className="py-32 md:py-48 px-6 md:px-12 lg:px-24 bg-warm-100 text-primary-900 selection:bg-accent selection:text-white border-t border-primary-900/5 relative overflow-hidden">
+    <section ref={containerRef} className="py-24 md:py-36 px-6 md:px-12 lg:px-24 bg-warm-100 text-primary-900 selection:bg-accent selection:text-white border-t border-primary-900/5 relative overflow-hidden">
        {/* Paper Grain Texture Overlay */}
        <svg className="absolute inset-0 z-0 w-full h-full opacity-[0.35] pointer-events-none mix-blend-multiply" xmlns="http://www.w3.org/2000/svg">
         <filter id="noiseFilterEvolution">
@@ -57,8 +57,8 @@ export const Evolution = () => {
       </svg>
 
        <div className="max-w-[1600px] mx-auto relative z-10">
-         <motion.div 
-          className="mb-24 flex flex-col md:flex-row justify-between md:items-end border-b border-primary-900/10 pb-8 gap-4"
+          <motion.div 
+          className="mb-16 flex flex-col md:flex-row justify-between md:items-end border-b border-primary-900/10 pb-8 gap-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}

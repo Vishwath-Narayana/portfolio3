@@ -101,7 +101,7 @@ const MetricRow = ({ label, value, status = 'none', delay = 0, highlight = false
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="flex items-center justify-between py-3.5 border-b group"
+      className="flex items-center justify-between py-3 border-b group"
       style={{ borderColor: 'rgba(255,255,255,0.04)' }}
     >
       <div className="flex items-center gap-3">
@@ -149,41 +149,44 @@ interface CellProps {
 const ActivityCell = ({ intensity, isRecent, weekIndex, dayIndex, onHover, animDelay }: CellProps) => {
   const style = INTENSITY_STYLES[intensity];
   const [entered, setEntered] = useState(false);
+  // isNow = the very last week
+  const isNow = weekIndex === WEEKS - 1;
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.5 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.3, delay: animDelay, ease: 'easeOut' }}
+      transition={{ duration: 0.25, delay: animDelay, ease: 'easeOut' }}
       onMouseEnter={(e) => {
         setEntered(true);
-        const rect = (e.target as HTMLElement).getBoundingClientRect();
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         onHover({ week: weekIndex, day: dayIndex, intensity, x: rect.left + rect.width / 2, y: rect.top });
       }}
       onMouseLeave={() => {
         setEntered(false);
         onHover(null);
       }}
-      className="rounded-[2px] cursor-pointer transition-all duration-150"
+      className="rounded-[2px] cursor-pointer"
       style={{
         width: '100%',
         paddingBottom: '100%',
         position: 'relative',
-        background: entered ? 'rgba(255,90,54,0.85)' : style.bg,
+        background: entered ? 'rgba(255,120,80,0.95)' : style.bg,
         boxShadow: entered
-          ? '0 0 14px rgba(255,90,54,0.7)'
-          : isRecent && intensity > 0
-          ? style.glow
+          ? '0 0 16px rgba(255,90,54,0.75)'
           : style.glow,
-        transform: entered ? 'scale(1.35)' : 'scale(1)',
+        transform: entered ? 'scale(1.4)' : 'scale(1)',
+        transition: 'background 80ms ease, box-shadow 80ms ease, transform 100ms ease',
+        outline: isNow && dayIndex === 0 ? '1px solid rgba(255,90,54,0.35)' : 'none',
+        outlineOffset: '1px',
       }}
     >
       {/* Pulse ring on recent high-intensity cells */}
       {isRecent && intensity >= 3 && !entered && (
         <span
           className="absolute inset-0 rounded-[2px] animate-ping"
-          style={{ background: 'rgba(255,90,54,0.25)', animationDuration: '2.5s' }}
+          style={{ background: 'rgba(255,90,54,0.22)', animationDuration: '3s' }}
         />
       )}
     </motion.div>
@@ -252,7 +255,7 @@ const ActivitySparkline = ({ data }: { data: number[][] }) => {
   const max = Math.max(...weeklyTotals, 1);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 pt-1 pb-1">
       <div className="flex justify-between items-center">
         <span className="font-mono text-[8px] tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
           24-Week Trend
@@ -261,7 +264,7 @@ const ActivitySparkline = ({ data }: { data: number[][] }) => {
           ↑ {weeklyTotals[weeklyTotals.length - 1] * 4}+ commits
         </span>
       </div>
-      <div className="flex items-end gap-[2px] h-8">
+      <div className="flex items-end gap-[2px] h-8 mt-1">
         {weeklyTotals.map((val, i) => {
           const heightPct = (val / max) * 100;
           const isRecent = i >= 20;
@@ -361,7 +364,7 @@ export const Infrastructure = () => {
   return (
     <section
       ref={containerRef}
-      className="py-32 md:py-48 px-6 md:px-12 lg:px-24 overflow-hidden relative border-t select-none"
+      className="py-24 md:py-36 px-6 md:px-12 lg:px-24 overflow-hidden relative border-t select-none"
       style={{ background: '#060606', borderColor: 'rgba(255,255,255,0.04)' }}
     >
       {/* Background: thin grid */}
@@ -384,67 +387,76 @@ export const Infrastructure = () => {
 
       <div className="max-w-[1600px] mx-auto relative z-10">
 
-        {/* ── Section Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 md:mb-24 flex flex-col md:flex-row justify-between md:items-end pb-8 border-b gap-4"
-          style={{ borderColor: 'rgba(255,255,255,0.05)' }}
-        >
-          <div className="flex flex-col gap-3">
-            <Mono className="text-accent uppercase tracking-widest text-[10px] md:text-xs">06 — Build Telemetry</Mono>
-            <h2 className="text-3xl md:text-5xl font-semibold tracking-[-0.02em] leading-tight text-white">
-              Real Activity<br />
-              <span style={{ color: 'rgba(255,255,255,0.22)' }}>Visualization.</span>
-            </h2>
-            <p className="font-light text-sm leading-relaxed max-w-md mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              A live representation of coding activity, project development, experiments, deployments, and continuous system building.
-            </p>
+        {/* ── Section Header with Telemetry Connectors ── */}
+        <div className="relative mb-12 md:mb-16 pb-8 border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+          {/* subtle horizontal telemetry connector lines */}
+          <div className="absolute bottom-[-1px] left-0 w-full h-[1px] z-0 pointer-events-none flex" style={{ opacity: 0.6 }}>
+            <motion.div
+              className="h-full bg-accent/40"
+              initial={{ width: 0 }}
+              whileInView={{ width: '100%' }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.5, ease: 'easeInOut' }}
+              style={{ maxWidth: '40%' }}
+            />
+            <div className="h-full w-full bg-gradient-to-r from-accent/40 via-white/10 to-transparent" />
           </div>
-          <Mono className="text-[10px] md:text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>
-            May 2025 — May 2026
-          </Mono>
-        </motion.div>
+          <div className="absolute right-0 bottom-[-3px] w-2 h-[5px] bg-accent/50 z-10 animate-pulse" />
 
-        {/* ── Split Layout ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col md:flex-row justify-between md:items-end gap-4 relative z-10"
+          >
+            <div className="flex flex-col gap-3">
+              <Mono className="text-accent uppercase tracking-widest text-[10px] md:text-xs flex items-center gap-2">
+                <span className="w-2 h-2 border border-accent/50 rounded-sm inline-block relative">
+                  <span className="absolute inset-[2px] bg-accent/50 animate-ping rounded-sm" />
+                </span>
+                06 — Build Telemetry
+              </Mono>
+              <h2 className="text-3xl md:text-5xl font-semibold tracking-[-0.02em] leading-tight text-white">
+                Real Activity<br />
+                <span style={{ color: 'rgba(255,255,255,0.22)' }}>Visualization.</span>
+              </h2>
+              <p className="font-light text-sm leading-relaxed max-w-md mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                A live representation of coding activity, project development, experiments, deployments, and continuous system building.
+              </p>
+            </div>
+            <Mono className="text-[10px] md:text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>
+              May 2025 — May 2026
+            </Mono>
+          </motion.div>
+        </div>
 
-          {/* ─── LEFT: Build Activity Dashboard ─── */}
+        {/* ── Split Layout: Unified Telemetry System ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+          {/* ─── LEFT: Build Activity Panel ─── */}
           <motion.div
             style={{ y: panelY }}
-            className="lg:col-span-4 flex flex-col gap-6"
+            initial={{ opacity: 0, x: -16 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-4 flex flex-col rounded bg-white/[0.012] border border-white/[0.05] overflow-hidden relative backdrop-blur-sm"
           >
+            {/* Top scanning line indicator */}
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent/20 to-transparent opacity-50" />
 
             {/* Metrics panel */}
-            <motion.div
-              initial={{ opacity: 0, x: -16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded p-5 flex flex-col"
-              style={{
-                background: 'rgba(255,255,255,0.018)',
-                border: '1px solid rgba(255,255,255,0.055)',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              {/* Panel header */}
-              <div className="flex justify-between items-center pb-4 mb-1 border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+            <div className="p-5 flex flex-col relative z-10 border-b border-white/[0.03] bg-white/[0.005]">
+              <div className="flex justify-between items-center pb-4 mb-1 border-b border-white/[0.04]">
                 <span className="font-mono text-[8px] tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                  build_activity
+                  system_status_&_activity
                 </span>
-                <span
-                  className="flex items-center gap-1.5 font-mono text-[8px] tracking-widest"
-                  style={{ color: 'rgba(255,90,54,0.6)' }}
-                >
+                <span className="flex items-center gap-1.5 font-mono text-[8px] tracking-widest text-accent/70">
                   <span className="w-1 h-1 rounded-full bg-accent animate-pulse inline-block" />
                   LIVE
                 </span>
               </div>
-
-              {/* Metrics */}
               <MetricRow label="PROJECTS_LAUNCHED"   value="14"          status="none"     delay={0.05} />
               <MetricRow label="EXPERIMENTS_CREATED" value="47"          status="none"     delay={0.1}  />
               <MetricRow label="COMMITS_THIS_YEAR"   value={`${commitApprox.toLocaleString()}`} status="none" delay={0.15} highlight />
@@ -453,35 +465,15 @@ export const Infrastructure = () => {
               <MetricRow label="AI_MODELS_TESTED"    value="12"          status="none"     delay={0.3}  />
               <MetricRow label="SYSTEM_STATUS"       value="BUILDING"    status="building" delay={0.35} highlight />
               <MetricRow label="CURRENT_FOCUS"       value="CREATIVE ENG" status="active"  delay={0.4}  />
-            </motion.div>
+            </div>
 
             {/* 24-week sparkline */}
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded p-5"
-              style={{
-                background: 'rgba(255,255,255,0.018)',
-                border: '1px solid rgba(255,255,255,0.055)',
-              }}
-            >
+            <div className="p-5 border-b border-white/[0.03]">
               <ActivitySparkline data={activityData} />
-            </motion.div>
+            </div>
 
             {/* Timeline reference callouts */}
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded p-5 flex flex-col gap-4"
-              style={{
-                background: 'rgba(255,255,255,0.018)',
-                border: '1px solid rgba(255,255,255,0.055)',
-              }}
-            >
+            <div className="p-5 flex flex-col gap-4 bg-white/[0.005]">
               <span className="font-mono text-[8px] tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
                 Timeline Reference
               </span>
@@ -511,41 +503,31 @@ export const Infrastructure = () => {
                   </div>
                 </div>
               ))}
-            </motion.div>
+            </div>
 
           </motion.div>
 
-          {/* ─── RIGHT: Interactive Heatmap Visualization ─── */}
+          {/* ─── RIGHT: Main Telemetry Wall ─── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
-            className="lg:col-span-8 flex flex-col gap-6"
+            className="lg:col-span-8 flex flex-col rounded bg-white/[0.012] border border-white/[0.05] overflow-hidden relative shadow-[0_0_80px_rgba(255,90,54,0.02)] backdrop-blur-sm"
           >
-            {/* Main heatmap panel */}
-            <div
-              className="rounded overflow-hidden"
-              style={{
-                background: 'rgba(255,255,255,0.018)',
-                border: '1px solid rgba(255,255,255,0.055)',
-                boxShadow: '0 0 80px rgba(255,90,54,0.03)',
-              }}
-            >
-              {/* Panel header */}
-              <div
-                className="flex justify-between items-center px-5 py-3 border-b"
-                style={{ borderColor: 'rgba(255,255,255,0.05)' }}
-              >
+            {/* Top scanning line indicator */}
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-accent/10 via-accent/40 to-accent/10 opacity-60" />
+
+            {/* Heatmap Panel */}
+            <div className="flex flex-col relative z-10 border-b border-white/[0.04] bg-white/[0.005]">
+              <div className="flex justify-between items-center px-5 py-4 border-b border-white/[0.04]">
                 <span className="font-mono text-[8px] tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
                   contribution_map · github_activity · 2025–2026
                 </span>
                 <HeatmapLegend />
               </div>
 
-              {/* Grid area */}
               <div className="p-5 overflow-x-auto">
-
                 {/* Month labels */}
                 <div className="flex mb-1.5" style={{ paddingLeft: 22 }}>
                   {Array.from({ length: WEEKS }).map((_, w) => {
@@ -588,7 +570,14 @@ export const Infrastructure = () => {
                   {/* Contribution cells */}
                   <div className="flex gap-[3px] flex-1 min-w-0">
                     {activityData.map((week, w) => (
-                      <div key={w} className="flex flex-col gap-[3px] flex-1 min-w-0">
+                      <div
+                        key={w}
+                        className="flex flex-col gap-[3px] flex-1 min-w-0 relative"
+                        style={{
+                          borderLeft: w === WEEKS - 1 ? '1px solid rgba(255,90,54,0.25)' : 'none',
+                          paddingLeft: w === WEEKS - 1 ? 2 : 0,
+                        }}
+                      >
                         {week.map((intensity, d) => (
                           <ActivityCell
                             key={d}
@@ -597,7 +586,7 @@ export const Infrastructure = () => {
                             weekIndex={w}
                             dayIndex={d}
                             onHover={info => setTooltip(info ? { ...info, week: w, day: d } : null)}
-                            animDelay={Math.min(w * 0.008 + d * 0.003, 0.6)}
+                            animDelay={Math.min(w * 0.007 + d * 0.002, 0.5)}
                           />
                         ))}
                       </div>
@@ -606,97 +595,123 @@ export const Infrastructure = () => {
                 </div>
 
                 {/* Bottom: stats strip */}
-                <div
-                  className="flex items-center justify-between mt-4 pt-4 border-t"
-                  style={{ borderColor: 'rgba(255,255,255,0.05)' }}
-                >
-                  <span className="font-mono text-[8px] tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.15)' }}>
-                    Total active days: <span style={{ color: 'rgba(255,90,54,0.6)' }}>
-                      {activityData.flat().filter(v => v > 0).length}
-                    </span> / 364
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/[0.04]">
+                  <span className="font-mono text-[8px] tracking-widest uppercase text-white/15">
+                    Total active days: <span className="text-accent/60">{activityData.flat().filter(v => v > 0).length}</span> / 364
                   </span>
-                  <span className="font-mono text-[8px] tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.15)' }}>
-                    Longest streak: <span style={{ color: 'rgba(255,90,54,0.6)' }}>146 days</span>
+                  <span className="font-mono text-[8px] tracking-widest uppercase text-white/15">
+                    Longest streak: <span className="text-accent/60">146 days</span>
                   </span>
                 </div>
-
               </div>
             </div>
 
-            {/* ── Bottom row: 3 mini stat cards ── */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* ── Mini Stat Cards Row ── */}
+            {/* Removed outer borders, converted to a grid row separated by vertical dividers */}
+            <div className="grid grid-cols-3 border-b border-white/[0.04] bg-black/20">
               {[
-                {
-                  label: 'Commits This Year',
-                  value: commitApprox,
-                  suffix: '',
-                  subtext: '↑ 34% vs prior year',
-                  glowColor: 'rgba(255,90,54,0.08)',
-                },
-                {
-                  label: 'Active Build Days',
-                  value: activityData.flat().filter(v => v > 0).length,
-                  suffix: '',
-                  subtext: `${Math.round((activityData.flat().filter(v => v > 0).length / 364) * 100)}% consistency rate`,
-                  glowColor: 'rgba(34,197,94,0.06)',
-                },
-                {
-                  label: 'Current Streak',
-                  value: 146,
-                  suffix: 'd',
-                  subtext: 'Personal best',
-                  glowColor: 'rgba(255,90,54,0.08)',
-                },
+                { label: 'Commits This Year', value: commitApprox, suffix: '', subtext: '↑ 34% vs prior year', color: 'text-accent/50' },
+                { label: 'Active Build Days', value: activityData.flat().filter(v => v > 0).length, suffix: '', subtext: `${Math.round((activityData.flat().filter(v => v > 0).length / 364) * 100)}% consistency rate`, color: 'text-green-500/50' },
+                { label: 'Current Streak', value: 146, suffix: 'd', subtext: 'Personal best', color: 'text-accent/50' },
               ].map((card, i) => (
-                <motion.div
+                <div
                   key={i}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-40px' }}
-                  transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="rounded p-4 flex flex-col gap-1.5"
-                  style={{
-                    background: 'rgba(255,255,255,0.018)',
-                    border: '1px solid rgba(255,255,255,0.055)',
-                    boxShadow: `inset 0 0 30px ${card.glowColor}`,
-                  }}
+                  className={`p-5 flex flex-col gap-1.5 relative ${i < 2 ? 'border-r border-white/[0.04]' : ''}`}
                 >
-                  <span className="font-mono text-[7px] tracking-[0.18em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                    {card.label}
-                  </span>
-                  <span className="font-mono text-2xl md:text-3xl font-semibold tracking-tighter" style={{ color: 'rgba(255,255,255,0.88)' }}>
+                  <span className="font-mono text-[7px] tracking-[0.18em] uppercase text-white/20">{card.label}</span>
+                  <span className="font-mono text-2xl md:text-3xl font-semibold tracking-tighter text-white/90">
                     <AnimatedCounter target={card.value} suffix={card.suffix} />
                   </span>
-                  <span className="font-mono text-[8px] tracking-wide" style={{ color: 'rgba(255,90,54,0.5)' }}>
-                    {card.subtext}
-                  </span>
-                </motion.div>
+                  <span className={`font-mono text-[8px] tracking-wide ${card.color}`}>{card.subtext}</span>
+                  {/* Subtle inner glow to mimic active state */}
+                  <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: `inset 0 0 40px ${card.color.includes('green') ? 'rgba(34,197,94,0.02)' : 'rgba(255,90,54,0.02)'}` }} />
+                </div>
               ))}
             </div>
 
-            {/* ── Ambient signal strip ── */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.2, delay: 0.3 }}
-              className="rounded px-5 py-3 flex items-center justify-between"
-              style={{
-                background: 'rgba(255,90,54,0.04)',
-                border: '1px solid rgba(255,90,54,0.1)',
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse inline-block" style={{ boxShadow: '0 0 5px rgba(255,90,54,0.8)' }} />
-                <span className="font-mono text-[8px] tracking-[0.18em] uppercase" style={{ color: 'rgba(255,90,54,0.7)' }}>
-                  System Online — Continuous build in progress
+            {/* ── Ambient Signal Strip & Engineering Momentum ── */}
+            <div className="flex flex-col p-5 bg-white/[0.008]">
+              {/* Signal Strip Header */}
+              <div className="flex justify-between items-center pb-4 mb-4 border-b border-white/[0.04]">
+                <div className="flex items-center gap-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse inline-block shadow-[0_0_5px_rgba(255,90,54,0.8)]" />
+                  <span className="font-mono text-[8px] tracking-[0.18em] uppercase text-accent/70">
+                    System Online — Continuous build in progress
+                  </span>
+                </div>
+                <span className="font-mono text-[8px] tracking-widest text-white/15">
+                  146-day streak active
                 </span>
               </div>
-              <span className="font-mono text-[8px] tracking-widest" style={{ color: 'rgba(255,255,255,0.15)' }}>
-                146-day streak active
-              </span>
-            </motion.div>
 
+              {/* Animated Waveform Graph (increased height to h-28) */}
+              <div className="relative w-full h-28 overflow-hidden mb-4 rounded border border-white/[0.03] bg-black/40">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:10%_25%] pointer-events-none" />
+                <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 200 40">
+                  <motion.path
+                    d="M 0 35 Q 15 25 25 30 T 45 15 T 65 30 T 85 10 T 105 20 T 125 15 T 145 25 T 165 5 T 185 20 T 200 10 L 200 40 L 0 40 Z"
+                    fill="url(#momentum-grad)"
+                    initial={{ opacity: 0.3 }}
+                    animate={{ opacity: 0.6 }}
+                    transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+                  />
+                  <motion.path
+                    d="M 0 35 Q 15 25 25 30 T 45 15 T 65 30 T 85 10 T 105 20 T 125 15 T 145 25 T 165 5 T 185 20 T 200 10"
+                    fill="none"
+                    stroke="rgba(255,90,54,0.4)"
+                    strokeWidth="0.5"
+                    initial={{ pathLength: 0 }}
+                    whileInView={{ pathLength: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 2.5, ease: "easeOut" }}
+                  />
+                  <motion.circle
+                    r="1.5"
+                    fill="#FF5A36"
+                    filter="url(#glow-momentum)"
+                    animate={{
+                       cx: [0, 15, 25, 45, 65, 85, 105, 125, 145, 165, 185, 200],
+                       cy: [35, 25, 30, 15, 30, 10, 20, 15, 25, 5, 20, 10]
+                    }}
+                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                  />
+                  <defs>
+                    <linearGradient id="momentum-grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgba(255,90,54,0.25)" />
+                      <stop offset="100%" stopColor="rgba(255,90,54,0)" />
+                    </linearGradient>
+                    <filter id="glow-momentum">
+                      <feGaussianBlur stdDeviation="1.5" result="blur" />
+                      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                    </filter>
+                  </defs>
+                </svg>
+                <div className="absolute top-2 left-3 font-mono text-[7px] text-white/30 uppercase tracking-widest">
+                  Commit Intensity Trend
+                </div>
+              </div>
+
+              {/* Build Logs */}
+              <div className="flex flex-col gap-2.5 font-mono text-[9px] tracking-wide text-white/45 pl-1 border-l border-accent/20">
+                <div className="flex items-start gap-4 hover:text-white/70 transition-colors ml-2">
+                  <span className="text-accent/70">23:41</span>
+                  <span>[SYS] deployed portfolio v3 edge network</span>
+                </div>
+                <div className="flex items-start gap-4 hover:text-white/70 transition-colors ml-2">
+                  <span className="text-accent/70">01:12</span>
+                  <span>[PERF] optimized telemetry rendering engine</span>
+                </div>
+                <div className="flex items-start gap-4 hover:text-white/70 transition-colors ml-2">
+                  <span className="text-accent/70">02:07</span>
+                  <span>[CORE] rebuilt motion interpolation for WebGL</span>
+                </div>
+                <div className="flex items-start gap-4 hover:text-white/70 transition-colors ml-2">
+                  <span className="text-accent/70">14:22</span>
+                  <span>[FEAT] integrated experimental AI agents</span>
+                </div>
+              </div>
+
+            </div>
           </motion.div>
         </div>
       </div>
