@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Exclude specific folders requested by the user
+Agent-comunnity/
+APPLE/
+Linear/
+zapier/
+
