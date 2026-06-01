@@ -285,8 +285,8 @@ const DashboardReplica = () => {
   );
 };
 
-// ─── Projects Data ────────────────────────────────────────────────────────────
-const projects = [
+// ─── Featured Projects Data ───────────────────────────────────────────────────
+const featuredProjects = [
   {
     title: 'AgentOS',
     role: 'System Architecture',
@@ -311,13 +311,65 @@ const projects = [
   },
 ];
 
-// ─── Project Card ─────────────────────────────────────────────────────────────
+// ─── Archive Projects Data ────────────────────────────────────────────────────
+const archiveProjects = [
+  {
+    title: 'Nexus Mesh',
+    description: 'Zero-trust microservices control plane with automated mTLS.',
+    tech: 'Go, gRPC, Envoy, Kubernetes',
+    status: 'LIVE',
+    color: 'from-neutral-900 to-neutral-950',
+    seed: 4.1
+  },
+  {
+    title: 'DataFlow Proxy',
+    description: 'High-throughput ingress routing for real-time telemetry streams.',
+    tech: 'Rust, Tokio, WebSockets',
+    status: 'LIVE',
+    color: 'from-slate-900 to-slate-950',
+    seed: 5.5
+  },
+  {
+    title: 'Cognitive Cache',
+    description: 'Distributed vector database caching layer for LLM agents.',
+    tech: 'Python, Redis, FastAPI, CUDA',
+    status: 'DEPRECATED',
+    color: 'from-zinc-900 to-zinc-950',
+    seed: 6.8
+  },
+  {
+    title: 'Observa',
+    description: 'Lightweight distributed tracing and log aggregation sidecar.',
+    tech: 'Go, eBPF, Prometheus',
+    status: 'LIVE',
+    color: 'from-stone-900 to-stone-950',
+    seed: 7.2
+  },
+  {
+    title: 'Neural CDN',
+    description: 'Edge-compute routing network for decentralized AI models.',
+    tech: 'Cloudflare Workers, Rust, WASM',
+    status: 'BETA',
+    color: 'from-neutral-900 to-neutral-950',
+    seed: 8.9
+  },
+  {
+    title: 'Quantum Ledger',
+    description: 'Immutable audit trail architecture for distributed financial systems.',
+    tech: 'TypeScript, Postgres, Kafka',
+    status: 'ARCHIVED',
+    color: 'from-slate-900 to-slate-950',
+    seed: 9.1
+  },
+];
+
+// ─── Featured Project Card ────────────────────────────────────────────────────
 const ProjectCard = ({
   project,
   index,
   scrollYProgress,
 }: {
-  project: typeof projects[0];
+  project: typeof featuredProjects[0];
   index: number;
   scrollYProgress: any;
 }) => {
@@ -343,7 +395,7 @@ const ProjectCard = ({
 
   const handleMouseLeave = () => { tiltX.set(0); tiltY.set(0); };
 
-  const y = useTransform(scrollYProgress, [0, 1], [0, isMobile ? 0 : (index % 2 !== 0 ? 100 : -100)]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, isMobile ? 0 : (index % 2 !== 0 ? 50 : -50)]);
   const UIComponent = project.ui;
 
   return (
@@ -352,7 +404,7 @@ const ProjectCard = ({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ y, rotateX: springTiltX, rotateY: springTiltY, transformStyle: 'preserve-3d' }}
-      className={`group flex flex-col gap-6 ${index % 2 !== 0 ? 'lg:mt-40' : ''}`}
+      className={`group flex flex-col gap-6 ${index % 2 !== 0 ? 'lg:mt-16' : ''}`}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-100px' }}
@@ -360,7 +412,7 @@ const ProjectCard = ({
     >
       {/* Card visual container */}
       <div
-        className={`aspect-[4/5] w-full rounded-md overflow-hidden bg-gradient-to-br ${project.color} relative border border-primary-700/50 group-hover:border-accent/30 p-6 md:p-8 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] lg:group-hover:scale-[1.01] cursor-none shadow-2xl group-hover:shadow-[0_0_40px_rgba(255,90,54,0.12)]`}
+        className={`h-[400px] md:h-[450px] w-full rounded-md overflow-hidden bg-gradient-to-br ${project.color} relative border border-primary-700/50 group-hover:border-accent/30 p-6 md:p-8 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] lg:group-hover:scale-[1.01] cursor-none shadow-2xl group-hover:shadow-[0_0_40px_rgba(255,90,54,0.12)]`}
         style={{ transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
       >
         {/* Fine grid overlay */}
@@ -407,7 +459,7 @@ const ProjectCard = ({
           </div>
         </div>
 
-        {/* Inline CTA — replaces floating "EXPLORE" cursor bubble */}
+        {/* Inline CTA */}
         <motion.div
           className="flex items-center gap-3 group/cta cursor-none pt-2"
           data-cursor="true"
@@ -436,6 +488,65 @@ const ProjectCard = ({
   );
 };
 
+// ─── Archive Project Card ─────────────────────────────────────────────────────
+const ArchiveProjectCard = ({ project, index }: { project: typeof archiveProjects[0], index: number }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
+      className="group relative flex flex-col bg-primary-900 border border-primary-700/60 rounded-md overflow-hidden hover:border-accent/40 transition-colors duration-500 cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(255,90,54,0.08)]"
+    >
+      {/* Small Visual Preview */}
+      <div className={`h-32 w-full bg-gradient-to-br ${project.color} relative overflow-hidden border-b border-primary-800`}>
+        {/* Subtle grid and overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] z-0 pointer-events-none" />
+        <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 mix-blend-screen scale-[1.5] origin-center">
+           <TopologyOverlay seed={project.seed} />
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex flex-col p-5 gap-4 flex-1 z-10">
+        <div className="flex justify-between items-start gap-2">
+          <h4 className="text-lg font-medium text-text-light group-hover:text-white transition-colors">
+            {project.title}
+          </h4>
+          <span className={`text-[9px] font-mono px-2 py-1 rounded border uppercase tracking-wider shrink-0 ${
+            project.status === 'LIVE' ? 'border-green-900/50 text-green-500 bg-green-950/20' :
+            project.status === 'BETA' ? 'border-yellow-900/50 text-yellow-500 bg-yellow-950/20' :
+            'border-primary-700/50 text-primary-400 bg-primary-800'
+          }`}>
+            {project.status}
+          </span>
+        </div>
+
+        <p className="text-sm text-primary-400 font-light leading-relaxed flex-1">
+          {project.description}
+        </p>
+
+        <div className="flex flex-col gap-3 mt-2 border-t border-primary-800/50 pt-4">
+          <Mono className="text-[10px] text-primary-500">{project.tech}</Mono>
+          
+          <div className="flex items-center gap-2 group/arch-cta mt-1">
+            <span className="font-mono text-[9px] text-accent/60 group-hover:text-accent transition-colors uppercase tracking-widest">
+              View Architecture
+            </span>
+            <motion.span
+              className="font-mono text-[9px] text-accent/60 group-hover:text-accent"
+              animate={{ x: [0, 3, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              →
+            </motion.span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export const SelectedWork = () => {
   const containerRef = useRef<HTMLElement>(null);
@@ -447,6 +558,8 @@ export const SelectedWork = () => {
   return (
     <section ref={containerRef} className="py-24 md:py-36 px-6 md:px-12 lg:px-24 bg-primary-800 relative z-10 overflow-hidden">
       <div className="max-w-[1600px] mx-auto relative z-10">
+        
+        {/* Featured Systems Header */}
         <motion.div
           className="mb-16 flex flex-col md:flex-row justify-between md:items-end border-b border-primary-700 pb-8 gap-4"
           initial={{ opacity: 0, y: 20 }}
@@ -454,12 +567,13 @@ export const SelectedWork = () => {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Heading className="tracking-tighter"><StaggeredReveal text="System Architecture" /></Heading>
+          <Heading className="tracking-tighter"><StaggeredReveal text="Featured Systems" /></Heading>
           <Mono className="text-primary-500">01 — 02</Mono>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-28">
-          {projects.map((project, index) => (
+        {/* Featured Systems Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 mb-32 md:mb-48">
+          {featuredProjects.map((project, index) => (
             <ProjectCard
               key={index}
               project={project}
@@ -468,6 +582,32 @@ export const SelectedWork = () => {
             />
           ))}
         </div>
+
+        {/* System Archive Header */}
+        <motion.div
+          className="mb-12 flex flex-col md:flex-row justify-between md:items-end border-b border-primary-700 pb-6 gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <h2 className="text-3xl md:text-4xl font-medium tracking-tight text-text-light">
+            System Archive
+          </h2>
+          <Mono className="text-primary-500 uppercase tracking-widest text-[10px]">Previous Architectures</Mono>
+        </motion.div>
+
+        {/* System Archive Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {archiveProjects.map((project, index) => (
+            <ArchiveProjectCard
+              key={index}
+              project={project}
+              index={index}
+            />
+          ))}
+        </div>
+
       </div>
     </section>
   );
