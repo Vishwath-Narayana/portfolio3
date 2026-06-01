@@ -1,5 +1,5 @@
 import { motion, animate } from 'framer-motion';
-import { Mono } from '../ui/Typography';
+import { Mono, Heading } from '../ui/Typography';
 import { useRef, useEffect, useState, useMemo, memo } from 'react';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -393,49 +393,23 @@ export const Infrastructure = () => {
 
       <div className="max-w-[1600px] mx-auto relative z-10">
 
-        {/* ── Section Header with Telemetry Connectors ── */}
-        <div className="relative mb-12 md:mb-16 pb-8 border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-          {/* subtle horizontal telemetry connector lines */}
-          <div className="absolute bottom-[-1px] left-0 w-full h-[1px] z-0 pointer-events-none flex" style={{ opacity: 0.6 }}>
-            <motion.div
-              className="h-full bg-accent/40 origin-left"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              style={{ width: '40%' }}
-            />
-            <div className="h-full w-full bg-gradient-to-r from-accent/40 via-white/10 to-transparent" />
-          </div>
-          <div className="absolute right-0 bottom-[-3px] w-2 h-[5px] bg-accent/50 z-10 animate-pulse" />
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col md:flex-row justify-between md:items-end gap-4 relative z-10"
-          >
-            <div className="flex flex-col gap-3">
-              <Mono className="text-accent uppercase tracking-widest text-[10px] md:text-xs flex items-center gap-2">
-                <span className="w-2 h-2 border border-accent/50 rounded-sm inline-block relative">
-                  <span className="absolute inset-[2px] bg-accent/50 animate-ping rounded-sm" />
-                </span>
-                06 — Build Telemetry
-              </Mono>
-              <h2 className="text-3xl md:text-5xl font-semibold tracking-[-0.02em] leading-tight text-white">
-                Real Activity<br />
-                <span style={{ color: 'rgba(255,255,255,0.22)' }}>Visualization.</span>
-              </h2>
-              <p className="font-light text-sm leading-relaxed max-w-md mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                A live representation of coding activity, project development, experiments, deployments, and continuous system building.
-              </p>
-            </div>
-            <Mono className="text-[10px] md:text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>
-              May 2025 — May 2026
-            </Mono>
-          </motion.div>
-        </div>
+        {/* Standard Section Header */}
+        <motion.div
+          className="mb-16 md:mb-24 flex flex-col border-b border-white/5 pb-6 gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <Mono className="text-accent text-sm md:text-base font-semibold">04 — BUILD TELEMETRY</Mono>
+          <div className="h-[1px] w-8 md:w-16 bg-white/10" />
+          <Heading className="text-3xl md:text-4xl lg:text-5xl tracking-tighter uppercase text-white/90 mt-2">
+            Real Activity Visualization
+          </Heading>
+          <p className="max-w-2xl text-white/40 font-light text-base md:text-lg leading-relaxed mt-2">
+            A live representation of coding activity, project development, experiments, deployments, and continuous system building.
+          </p>
+        </motion.div>
 
         {/* ── Split Layout: Unified Telemetry System ── */}
         <motion.div

@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Heading, Mono, Body, StaggeredReveal, VerticalText } from '../ui/Typography';
+import { Heading, Mono, Body, VerticalText } from '../ui/Typography';
 import { useRef } from 'react';
 
 export const Philosophy = () => {
@@ -44,64 +44,74 @@ export const Philosophy = () => {
         <VerticalText className="font-mono text-xs tracking-widest text-primary-900">SYS_LOG: ARCHITECTURE_OVER_AESTHETICS</VerticalText>
       </motion.div>
 
-      <motion.div 
-        style={{ opacity: textOpacity }}
-        className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 relative z-10"
-      >
-        <div className="lg:col-span-4 flex flex-col gap-8 relative">
-          <div className="sticky top-48">
-            <Mono className="text-primary-900/40 mb-6 block">02 — Philosophy</Mono>
-            <Heading className="max-w-xs text-balance tracking-tighter text-primary-900">
-              <StaggeredReveal text="Infrastructure dictates the human experience." />
-            </Heading>
+        <motion.div 
+          style={{ opacity: textOpacity }}
+          className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 relative z-10"
+        >
+          <div className="lg:col-span-4 flex flex-col gap-8 relative">
+            <div className="sticky top-48">
+              {/* Standard Section Header */}
+              <motion.div
+                className="flex flex-col border-b border-primary-900/10 pb-6 gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Mono className="text-accent text-sm md:text-base font-semibold">02 — PHILOSOPHY</Mono>
+                <div className="h-[1px] w-8 md:w-16 bg-primary-900/20" />
+                <Heading className="text-3xl md:text-4xl lg:text-5xl tracking-tighter uppercase text-primary-900 mt-2 text-balance leading-[1.1]">
+                  Infrastructure Dictates The Human Experience.
+                </Heading>
+              </motion.div>
+            </div>
           </div>
-        </div>
 
-        <motion.div style={{ y: y1 }} className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-x-20 lg:gap-y-16 lg:pt-32">
+          <motion.div style={{ y: y1 }} className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-x-20 lg:gap-y-20 lg:pt-16">
           {/* Card 1 */}
-          <div className="flex flex-col gap-5 border-t border-primary-900/10 pt-8 group">
+          <div className="flex flex-col gap-6 border-t border-primary-900/10 pt-8 group">
             <div className="flex justify-between items-center">
               <span className="font-mono text-sm text-accent font-semibold">[SYS_01]</span>
-              <span className="font-mono text-[9px] text-primary-900/40 uppercase">Frontend Facade</span>
+              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Frontend Facade</span>
             </div>
-            <h3 className="text-2xl font-medium tracking-tight text-primary-900">The Illusion of Frontend</h3>
-            <Body className="text-primary-800/80 leading-relaxed text-sm md:text-base font-light">
+            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">The Illusion of Frontend</h3>
+            <Body className="text-primary-800/80 leading-relaxed text-base md:text-lg font-light">
               We often treat the interface as the product. But a beautiful UI backed by brittle architecture is a facade. Real user experience is bound by latency, deployment models, and database design. I engineer from the metal up.
             </Body>
           </div>
 
           {/* Card 2 */}
-          <div className="flex flex-col gap-5 border-t border-primary-900/10 pt-8 group">
+          <div className="flex flex-col gap-6 border-t border-primary-900/10 pt-8 group">
             <div className="flex justify-between items-center">
               <span className="font-mono text-sm text-accent font-semibold">[SYS_02]</span>
-              <span className="font-mono text-[9px] text-primary-900/40 uppercase">Motion Physics</span>
+              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Motion Physics</span>
             </div>
-            <h3 className="text-2xl font-medium tracking-tight text-primary-900">Motion as Feedback</h3>
-            <Body className="text-primary-800/80 leading-relaxed text-sm md:text-base font-light">
+            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">Motion as Feedback</h3>
+            <Body className="text-primary-800/80 leading-relaxed text-base md:text-lg font-light">
               Motion isn't decoration; it's communication. Using physics-based DOM interpolation, I design interactions that provide subconscious reassurance. A system that moves with natural inertia feels inherently more trustworthy.
             </Body>
           </div>
 
           {/* Card 3 */}
-          <div className="flex flex-col gap-5 border-t border-primary-900/10 pt-8 group">
+          <div className="flex flex-col gap-6 border-t border-primary-900/10 pt-8 group">
             <div className="flex justify-between items-center">
               <span className="font-mono text-sm text-accent font-semibold">[SYS_03]</span>
-              <span className="font-mono text-[9px] text-primary-900/40 uppercase">Token Architecture</span>
+              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Token Architecture</span>
             </div>
-            <h3 className="text-2xl font-medium tracking-tight text-primary-900">Systems, Not Pages</h3>
-            <Body className="text-primary-800/80 leading-relaxed text-sm md:text-base font-light">
+            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">Systems, Not Pages</h3>
+            <Body className="text-primary-800/80 leading-relaxed text-base md:text-lg font-light">
               I do not design pages. I design scalable token architectures and modular components that empower product teams. True scalability comes from minimizing entropy at the foundation.
             </Body>
           </div>
 
           {/* Card 4 */}
-          <div className="flex flex-col gap-5 border-t border-primary-900/10 pt-8 group">
+          <div className="flex flex-col gap-6 border-t border-primary-900/10 pt-8 group">
             <div className="flex justify-between items-center">
               <span className="font-mono text-sm text-accent font-semibold">[SYS_04]</span>
-              <span className="font-mono text-[9px] text-primary-900/40 uppercase">Cognitive Load</span>
+              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Cognitive Load</span>
             </div>
-            <h3 className="text-2xl font-medium tracking-tight text-primary-900">Engineering Empathy</h3>
-            <Body className="text-primary-800/80 leading-relaxed text-sm md:text-base font-light">
+            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">Engineering Empathy</h3>
+            <Body className="text-primary-800/80 leading-relaxed text-base md:text-lg font-light">
               The best developers understand the cognitive load of their end users. The best designers understand the runtime cost of their animations. I exist in the overlap, ensuring neither side compromises the other.
             </Body>
           </div>

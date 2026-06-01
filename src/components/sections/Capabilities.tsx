@@ -28,36 +28,40 @@ export const Capabilities = () => {
   return (
     <section className="py-24 md:py-36 px-6 md:px-12 lg:px-24 bg-primary-900 border-t border-primary-800 select-none">
       <div className="max-w-[1600px] mx-auto">
+        {/* Standard Section Header */}
         <motion.div
-          className="mb-16 flex justify-between items-end border-b border-primary-800 pb-8"
+          className="mb-16 md:mb-24 flex flex-col border-b border-primary-800/60 pb-6 gap-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Heading>Capabilities Matrix</Heading>
-          <Mono>04 — System</Mono>
+          <Mono className="text-accent text-sm md:text-base font-semibold">03 — CAPABILITIES</Mono>
+          <div className="h-[1px] w-8 md:w-16 bg-primary-700" />
+          <Heading className="text-3xl md:text-4xl lg:text-5xl tracking-tighter uppercase text-text-light mt-2">
+            Capabilities Matrix
+          </Heading>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-16 gap-y-16">
           {capabilityGroups.map((group, colIdx) => (
             <motion.div
               key={colIdx}
-              className="flex flex-col gap-5"
+              className="flex flex-col gap-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
               transition={{ delay: colIdx * 0.08, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
               {/* Group header */}
-              <div className="flex justify-between items-center border-b border-primary-800 pb-3">
+              <div className="flex justify-between items-center border-b border-primary-800 pb-4">
                 <Mono className="text-accent">{group.title}</Mono>
                 <span className="font-mono text-[8px] text-primary-700">
                   [{String(colIdx + 1).padStart(2, '0')}]
                 </span>
               </div>
 
-              <ul className="flex flex-col gap-0">
+              <ul className="flex flex-col gap-1">
                 {group.items.map((item, rowIdx) => {
                   const isHovered      = hoveredItem?.col === colIdx && hoveredItem?.row === rowIdx;
                   const isCrossLinked  = hoveredItem !== null && hoveredItem.col !== colIdx && hoveredItem.row === rowIdx;

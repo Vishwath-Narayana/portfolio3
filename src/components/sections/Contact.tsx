@@ -70,17 +70,18 @@ export const Contact = () => {
 
       <motion.div
         style={isMobile ? {} : { scale, opacity }}
-        className="text-center flex flex-col items-center gap-8 z-10 w-full max-w-[1600px]"
+        className="flex flex-col z-10 w-full max-w-[1600px]"
       >
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-        >
-          <Mono className="text-accent uppercase tracking-widest text-[9px] border border-accent/25 px-4 py-2 rounded-full backdrop-blur-sm bg-primary-900/40 shadow-[0_0_15px_rgba(255,90,54,0.08)]">
-            System Offline. Terminals Suspended.
-          </Mono>
-        </motion.div>
+        <div className="text-center flex flex-col items-center gap-12 w-full mt-4">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            <Mono className="text-accent uppercase tracking-widest text-[10px] border border-accent/25 px-5 py-2.5 rounded-full backdrop-blur-sm bg-primary-900/40 shadow-[0_0_15px_rgba(255,90,54,0.08)]">
+              [ DIRECTIVE_OPEN ] INITIATE TRANSMISSION
+            </Mono>
+          </motion.div>
 
         <a
           href="mailto:hello@vishwathnarayana.in"
@@ -99,6 +100,7 @@ export const Contact = () => {
             <SignalFocusText text="ALIVE." />
           </h2>
         </a>
+        </div>
       </motion.div>
 
       {/* Narrative Footer */}

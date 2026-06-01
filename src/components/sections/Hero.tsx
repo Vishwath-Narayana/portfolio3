@@ -566,18 +566,8 @@ export const Hero = () => {
           <div className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             {/* LEFT SIDE: Typography */}
-            <div className="lg:col-span-8 flex flex-col gap-8 md:gap-10">
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.05, ease: 'easeOut' }}
-                className="flex items-center gap-3"
-              >
-                <div className="w-[5px] h-[5px] bg-accent/80 rounded-full animate-pulse shadow-[0_0_8px_rgba(255,90,54,0.6)]" />
-                <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/50">
-                  Personal Operating System / V3
-                </span>
-              </motion.div>
+            <div className="lg:col-span-8 flex flex-col gap-8 md:gap-10 pl-4 md:pl-8 lg:pl-16">
+
 
               <InteractiveHeadline mouseX={mouseX} mouseY={mouseY} />
 

@@ -1,6 +1,6 @@
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { useRef, useEffect, useState } from 'react';
-import { Heading, Mono, Body, StaggeredReveal } from '../ui/Typography';
+import { motion } from 'framer-motion';
+import { useRef } from 'react';
+import { Heading, Mono, Body } from '../ui/Typography';
 
 // ─── Ambient Topology SVG Overlay ────────────────────────────────────────────
 // Subtle procedural node/trace diagram that drifts slowly behind UI replicas
@@ -94,448 +94,138 @@ const TopologyOverlay = ({ seed }: { seed: number }) => {
   );
 };
 
-// ─── Terminal Replica ─────────────────────────────────────────────────────────
-const TerminalReplica = () => {
-  const [lines, setLines] = useState<string[]>([]);
-  const [clickCount, setClickCount] = useState(0);
-
-  const deployText = [
-    '[INFO] Initializing terraform plan...',
-    '[INFO] Acquiring state lock. Done.',
-    '[WARN] module.eks_cluster.aws_eks_cluster.main: Refreshing state...',
-    '[INFO] Plan: 4 to add, 1 to change, 0 to destroy.',
-    '[OK] Apply complete! Resources: 4 added, 1 changed.',
-    '[INFO] Updating kubeconfig for cluster \'prod-main\'...',
-    '[OK] Context set to \'prod-main\'.',
-    '[INFO] Rolling update for deployment/api-gateway triggered.',
-    '> Awaiting health checks... [CLICK TO RUN BUILD]'
-  ];
-
-  const compileText = [
-    '$ docker build -t us-east1-docker.pkg.dev/proj/repo/api:v2 .',
-    '[INFO] Step 1/8 : FROM node:20-alpine AS builder',
-    '[INFO] Step 3/8 : RUN npm ci --omit=dev',
-    '[WARN] npm WARN deprecated core-js@2.6.12',
-    '[INFO] Step 6/8 : COPY --from=builder /app/dist ./dist',
-    '[OK] Successfully built 8a9b2c3d4e5f',
-    '[INFO] Pushing image to Artifact Registry...',
-    '[OK] sha256:1a2b3c... pushed successfully.',
-    '> READY FOR DEPLOYMENT [CLICK TO DEPLOY]'
-  ];
-
-  const activeText = clickCount % 2 === 0 ? deployText : compileText;
-
-  useEffect(() => {
-    setLines([]);
-    let currentLine = 0;
-    const interval = setInterval(() => {
-      if (currentLine < activeText.length) {
-        setLines(prev => [...prev, activeText[currentLine]]);
-        currentLine++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 550);
-    return () => clearInterval(interval);
-  }, [clickCount]);
-
-  return (
-    <div
-      onClick={() => setClickCount(prev => prev + 1)}
-      className="absolute inset-x-4 md:inset-x-12 bottom-0 h-64 bg-[#0A0A0A] border border-primary-700/80 rounded-t-lg shadow-2xl p-4 flex flex-col font-mono text-[10px] md:text-xs text-primary-300 transform translate-y-32 group-hover:translate-y-8 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer z-20 group/term select-none"
-    >
-      <div className="flex justify-between items-center border-b border-primary-800 pb-3 mb-4">
-        <div className="flex gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-primary-700 group-hover/term:bg-red-500 transition-colors" />
-          <div className="w-2.5 h-2.5 rounded-full bg-primary-700 group-hover/term:bg-yellow-500 transition-colors" />
-          <div className="w-2.5 h-2.5 rounded-full bg-primary-700 group-hover/term:bg-green-500 transition-colors" />
-        </div>
-        <span className="text-primary-600 tracking-wider text-[9px] uppercase">
-          bash — {clickCount % 2 === 0 ? 'root@deploy-sys' : 'root@compiler-sys'} — 80x24
-        </span>
-      </div>
-      <div className="flex-1 overflow-hidden flex flex-col gap-1.5 pointer-events-none">
-        {lines.map((line, i) => {
-          if (!line) return null;
-          return (
-            <motion.div key={i} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }}>
-              {line.startsWith('[OK]') ? (
-                <span className="text-green-500/90">{line}</span>
-              ) : line.startsWith('[WARN]') ? (
-                <span className="text-yellow-500/90">{line}</span>
-              ) : line.startsWith('>') ? (
-                <span className="text-accent animate-pulse font-semibold">{line}</span>
-              ) : line.startsWith('$') ? (
-                <span className="text-white font-bold">{line}</span>
-              ) : (
-                <span className="text-primary-400">{line}</span>
-              )}
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// ─── Dashboard Replica ────────────────────────────────────────────────────────
-const DashboardReplica = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'metrics' | 'traces'>('overview');
-  const [latency, setLatency] = useState(42);
-  const [errors, setErrors] = useState(0.01);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLatency(prev => {
-        const offset = Math.random() > 0.5 ? 1 : -1;
-        return Math.max(38, Math.min(48, prev + offset));
-      });
-      setErrors(prev => {
-        if (Math.random() > 0.8) return parseFloat((0.01 + Math.random() * 0.03).toFixed(2));
-        return prev;
-      });
-    }, 1500);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="absolute inset-x-4 md:inset-x-12 bottom-0 h-64 bg-primary-900 border border-primary-700/80 rounded-t-lg shadow-2xl flex flex-col transform translate-y-32 group-hover:translate-y-8 transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden z-20">
-      <div className="h-12 bg-primary-950 border-b border-primary-800 flex items-center px-6 justify-between select-none">
-        <div className="flex gap-4">
-          {(['overview', 'metrics', 'traces'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`text-[9px] uppercase font-mono px-2.5 py-1.5 rounded transition-all duration-300 cursor-pointer ${activeTab === tab ? 'text-primary-200 bg-primary-800 shadow-sm' : 'text-primary-500 hover:text-primary-300'}`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[9px] font-mono text-primary-400 uppercase tracking-widest animate-pulse">Live Stream</span>
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-        </div>
-      </div>
-
-      <div className="flex-1 p-5 grid grid-cols-3 gap-5">
-        <div className="col-span-2 border border-primary-800 bg-[#0A0A0A] rounded flex flex-col p-4 relative overflow-hidden">
-          <span className="text-[10px] font-mono text-primary-500 mb-2 uppercase tracking-wider">
-            {activeTab === 'overview' && 'Requests / sec (Global)'}
-            {activeTab === 'metrics' && 'Resource Allocation'}
-            {activeTab === 'traces' && 'Recent Network Events'}
-          </span>
-          <div className="flex-1 w-full relative mt-2 border-t border-primary-900 pt-2 border-dashed">
-            {activeTab === 'overview' && (
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
-                <motion.path
-                  d="M0,35 L5,35 L5,28 L10,28 L10,32 L15,32 L15,20 L20,20 L20,25 L25,25 L25,15 L30,15 L30,22 L35,22 L35,10 L40,10 L40,18 L45,18 L45,8 L50,8 L50,15 L55,15 L55,5 L60,5 L60,12 L65,12 L65,25 L70,25 L70,20 L75,20 L75,30 L80,30 L80,15 L85,15 L85,10 L90,10 L90,20 L95,20 L95,25 L100,25"
-                  fill="none" stroke="#FF5A36" strokeWidth="1"
-                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, ease: 'easeOut' }}
-                />
-                <path d="M0,40 L0,35 L5,35 L5,28 L10,28 L10,32 L15,32 L15,20 L20,20 L20,25 L25,25 L25,15 L30,15 L30,22 L35,22 L35,10 L40,10 L40,18 L45,18 L45,8 L50,8 L50,15 L55,15 L55,5 L60,5 L60,12 L65,12 L65,25 L70,25 L70,20 L75,20 L75,30 L80,30 L80,15 L85,15 L85,10 L90,10 L90,20 L95,20 L95,25 L100,25 L100,40 Z" fill="url(#grad2)" />
-                <defs>
-                  <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(255,90,54,0.15)" />
-                    <stop offset="100%" stopColor="rgba(255,90,54,0)" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            )}
-            {activeTab === 'metrics' && (
-              <div className="flex flex-col gap-2.5 font-mono text-[9px] text-primary-400 mt-1">
-                {[['CLUSTER CPU USAGE', '62%'], ['CLUSTER MEMORY ALLOCATION', '84%']].map(([label, val]) => (
-                  <div key={label} className="flex flex-col gap-1">
-                    <div className="flex justify-between"><span>{label}</span><span>{val}</span></div>
-                    <div className="w-full h-1.5 bg-primary-950 rounded-full overflow-hidden border border-primary-800">
-                      <motion.div className="h-full bg-accent" initial={{ width: 0 }} animate={{ width: val }} transition={{ duration: 1 }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {activeTab === 'traces' && (
-              <div className="flex flex-col gap-1.5 font-mono text-[9px] text-primary-400 select-none overflow-hidden h-full">
-                <div className="flex justify-between text-green-500/90 border-b border-primary-950 pb-1">
-                  <span>GET /api/v1/workload</span><span>200 OK</span><span>14ms</span>
-                </div>
-                <div className="flex justify-between text-green-500/90 border-b border-primary-950 pb-1">
-                  <span>POST /api/v1/rebalance</span><span>201 CREATED</span><span>32ms</span>
-                </div>
-                <div className="flex justify-between text-yellow-500/90 border-b border-primary-950 pb-1">
-                  <span>GET /api/v1/db-status</span><span>200 OK</span><span>{latency}ms</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="col-span-1 flex flex-col gap-5 select-none">
-          <div className="flex-1 border border-primary-800 bg-[#0A0A0A] rounded flex flex-col justify-center items-center">
-            <span className="text-[10px] font-mono text-primary-500 mb-1 uppercase tracking-wider">Latency</span>
-            <span className="text-2xl font-mono text-text-light tracking-tighter tabular-nums">{latency}ms</span>
-          </div>
-          <div className="flex-1 border border-red-900/30 bg-red-950/20 rounded flex flex-col justify-center items-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-red-500/5 animate-pulse" />
-            <span className="text-[10px] font-mono text-red-500/70 mb-1 z-10 uppercase tracking-wider">Error Rate</span>
-            <span className="text-xl font-mono text-red-400 z-10 tabular-nums">{errors}%</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─── Featured Projects Data ───────────────────────────────────────────────────
-const featuredProjects = [
+// ─── Unified Projects Data ────────────────────────────────────────────────────
+const allProjects = [
   {
     title: 'AgentOS',
-    role: 'System Architecture',
-    year: '2025',
-    challenge: 'Built a distributed execution environment for autonomous agents. Solved the problem of cognitive overload by abstracting complex parallel processing traces into a readable, brutalist CLI interface. Technically notable for handling 10,000+ live WebSocket events per second without dropping frames using WebGL rendering.',
-    architecture: 'React, Framer Motion, WebGL',
+    description: 'Distributed execution environment and cognitive tracing CLI for autonomous parallel agents.',
+    tech: 'React • Framer Motion • WebGL',
+    status: 'ACTIVE',
     color: 'from-zinc-900 to-zinc-950',
-    ui: TerminalReplica,
-    cta: 'OPEN CASE STUDY',
-    topologySeed: 1.2,
+    seed: 1.2
   },
   {
     title: 'InfraScale',
-    role: 'DevOps & Full Stack',
-    year: '2024',
-    challenge: 'Developed an enterprise-grade observability platform for global mesh networks. Solved latency visibility gaps by rendering real-time packet traces in an SVG-based network topology map. Impressive for its bespoke streaming engine capable of sub-50ms render latency directly in the DOM.',
-    architecture: 'Next.js, Prisma, PostgreSQL, Docker',
+    description: 'Enterprise observability platform rendering real-time global mesh network packet traces.',
+    tech: 'Next.js • Prisma • PostgreSQL • Docker',
+    status: 'ACTIVE',
     color: 'from-stone-900 to-stone-950',
-    ui: DashboardReplica,
-    cta: 'INSPECT ARCHITECTURE',
-    topologySeed: 2.7,
+    seed: 2.7
   },
-];
-
-// ─── Archive Projects Data ────────────────────────────────────────────────────
-const archiveProjects = [
   {
     title: 'Nexus Mesh',
-    description: 'Zero-trust microservices control plane with automated mTLS.',
-    tech: 'Go, gRPC, Envoy, Kubernetes',
+    description: 'Zero-trust microservices control plane featuring automated mTLS certificate rotation.',
+    tech: 'Go • gRPC • Envoy • Kubernetes',
     status: 'LIVE',
     color: 'from-neutral-900 to-neutral-950',
     seed: 4.1
   },
   {
     title: 'DataFlow Proxy',
-    description: 'High-throughput ingress routing for real-time telemetry streams.',
-    tech: 'Rust, Tokio, WebSockets',
+    description: 'High-throughput ingress routing layer for real-time telemetry streaming at scale.',
+    tech: 'Rust • Tokio • WebSockets',
     status: 'LIVE',
     color: 'from-slate-900 to-slate-950',
     seed: 5.5
   },
   {
     title: 'Cognitive Cache',
-    description: 'Distributed vector database caching layer for LLM agents.',
-    tech: 'Python, Redis, FastAPI, CUDA',
+    description: 'Distributed vector database caching layer built to minimize LLM agent latency.',
+    tech: 'Python • Redis • FastAPI • CUDA',
     status: 'DEPRECATED',
     color: 'from-zinc-900 to-zinc-950',
     seed: 6.8
   },
   {
     title: 'Observa',
-    description: 'Lightweight distributed tracing and log aggregation sidecar.',
-    tech: 'Go, eBPF, Prometheus',
+    description: 'Lightweight distributed tracing and log aggregation sidecar utilizing eBPF hooks.',
+    tech: 'Go • eBPF • Prometheus',
     status: 'LIVE',
     color: 'from-stone-900 to-stone-950',
     seed: 7.2
   },
   {
     title: 'Neural CDN',
-    description: 'Edge-compute routing network for decentralized AI models.',
-    tech: 'Cloudflare Workers, Rust, WASM',
+    description: 'Edge-compute routing network optimized for decentralized AI model inference.',
+    tech: 'Cloudflare Workers • Rust • WASM',
     status: 'BETA',
     color: 'from-neutral-900 to-neutral-950',
     seed: 8.9
   },
   {
     title: 'Quantum Ledger',
-    description: 'Immutable audit trail architecture for distributed financial systems.',
-    tech: 'TypeScript, Postgres, Kafka',
+    description: 'Immutable audit trail architecture designed for distributed financial systems.',
+    tech: 'TypeScript • Postgres • Kafka',
     status: 'ARCHIVED',
     color: 'from-slate-900 to-slate-950',
     seed: 9.1
   },
 ];
 
-// ─── Featured Project Card ────────────────────────────────────────────────────
-const ProjectCard = ({
-  project,
-  index,
-  scrollYProgress,
-}: {
-  project: typeof featuredProjects[0];
-  index: number;
-  scrollYProgress: any;
-}) => {
-  const [isMobile, setIsMobile] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const tiltX = useMotionValue(0);
-  const tiltY = useMotionValue(0);
-  const springTiltX = useSpring(tiltX, { damping: 40, stiffness: 90 });
-  const springTiltY = useSpring(tiltY, { damping: 40, stiffness: 90 });
-
-  useEffect(() => {
-    setIsMobile(window.matchMedia('(max-width: 1024px)').matches);
-  }, []);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || isMobile) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left - rect.width / 2;
-    const mouseY = e.clientY - rect.top - rect.height / 2;
-    tiltX.set(-(mouseY / (rect.height / 2)) * 5);
-    tiltY.set((mouseX / (rect.width / 2)) * 5);
-  };
-
-  const handleMouseLeave = () => { tiltX.set(0); tiltY.set(0); };
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, isMobile ? 0 : (index % 2 !== 0 ? 50 : -50)]);
-  const UIComponent = project.ui;
-
+// ─── System Card Component ────────────────────────────────────────────────────
+const SystemCard = ({ project, index }: { project: typeof allProjects[0], index: number }) => {
   return (
     <motion.div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{ y, rotateX: springTiltX, rotateY: springTiltY, transformStyle: 'preserve-3d' }}
-      className={`group flex flex-col gap-6 ${index % 2 !== 0 ? 'lg:mt-16' : ''}`}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-100px' }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {/* Card visual container */}
-      <div
-        className={`h-[400px] md:h-[450px] w-full rounded-md overflow-hidden bg-gradient-to-br ${project.color} relative border border-primary-700/50 group-hover:border-accent/30 p-6 md:p-8 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] lg:group-hover:scale-[1.01] cursor-none shadow-2xl group-hover:shadow-[0_0_40px_rgba(255,90,54,0.12)]`}
-        style={{ transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
-      >
-        {/* Fine grid overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:3rem_3rem] z-0 pointer-events-none" />
-
-        {/* Ambient topology overlay */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-100 group-hover:opacity-100 transition-opacity duration-700">
-          <TopologyOverlay seed={project.topologySeed} />
-        </div>
-
-        {/* Role / Year tags */}
-        <div className="flex justify-between items-start opacity-60 z-10 pointer-events-none" style={{ transform: 'translateZ(30px)' }}>
-          <Mono className="text-[10px]">{project.role}</Mono>
-          <Mono className="text-[10px]">{project.year}</Mono>
-        </div>
-
-        {/* Watermark title */}
-        <div
-          className="absolute inset-0 flex items-center justify-center opacity-[0.025] font-mono text-6xl md:text-8xl tracking-tighter mix-blend-overlay uppercase z-0 text-center px-4 pointer-events-none select-none"
-          style={{ transform: 'translateZ(10px)' }}
-        >
-          {project.title}
-        </div>
-
-        {/* UI Replica */}
-        <div style={{ transform: 'translateZ(50px)', transformStyle: 'preserve-3d' }} className="w-full h-full absolute inset-0 pointer-events-auto">
-          <UIComponent />
-        </div>
-      </div>
-
-      {/* Card info */}
-      <div className="flex flex-col gap-5" style={{ transform: 'translateZ(20px)' }}>
-        <h3 className="text-3xl font-medium tracking-tight border-b border-primary-700/50 pb-4 text-text-light">
-          {project.title}
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="flex flex-col gap-2">
-            <Mono className="text-[10px] text-primary-500 uppercase tracking-widest">Engineering Artifact</Mono>
-            <Body className="text-sm md:text-base text-primary-300 font-light leading-relaxed">{project.challenge}</Body>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Mono className="text-[10px] text-primary-500 uppercase tracking-widest">Infrastructure Stack</Mono>
-            <Body className="text-sm md:text-base font-mono text-primary-400">{project.architecture}</Body>
-          </div>
-        </div>
-
-        {/* Inline CTA */}
-        <motion.div
-          className="flex items-center gap-3 group/cta cursor-none pt-2"
-          data-cursor="true"
-          data-cursor-text="VIEW"
-          whileHover={{ x: 4 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-        >
-          <span
-            className="font-mono text-[10px] tracking-[0.18em] uppercase transition-colors duration-300"
-            style={{ color: 'rgba(255,90,54,0.55)' }}
-          >
-            {project.cta}
-          </span>
-          <motion.span
-            className="font-mono text-[10px] text-accent/55"
-            animate={{ x: [0, 4, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            →
-          </motion.span>
-          {/* Underline */}
-          <div className="flex-1 h-[1px] bg-accent/15 group-hover/cta:bg-accent/40 transition-colors duration-300" />
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-};
-
-// ─── Archive Project Card ─────────────────────────────────────────────────────
-const ArchiveProjectCard = ({ project, index }: { project: typeof archiveProjects[0], index: number }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
-      className="group relative flex flex-col bg-primary-900 border border-primary-700/60 rounded-md overflow-hidden hover:border-accent/40 transition-colors duration-500 cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(255,90,54,0.08)]"
+      transition={{ duration: 0.6, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative flex flex-col bg-[#0A0A0A] border border-primary-800/80 rounded-md overflow-hidden hover:border-red-900/50 transition-all duration-500 cursor-pointer shadow-lg hover:shadow-[0_0_30px_rgba(255,90,54,0.1)] hover:-translate-y-1"
     >
-      {/* Small Visual Preview */}
-      <div className={`h-32 w-full bg-gradient-to-br ${project.color} relative overflow-hidden border-b border-primary-800`}>
-        {/* Subtle grid and overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] z-0 pointer-events-none" />
-        <div className="absolute inset-0 opacity-40 group-hover:opacity-100 transition-opacity duration-700 mix-blend-screen scale-[1.5] origin-center">
+      {/* Background layer with topology overlay */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${project.color} opacity-40 z-0`}>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.012)_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
+        <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700 mix-blend-screen scale-110 origin-center">
            <TopologyOverlay seed={project.seed} />
         </div>
       </div>
+      
+      {/* Illumination edge */}
+      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-red-500/0 to-transparent group-hover:via-red-500/50 transition-all duration-700 z-10" />
 
       {/* Content Area */}
-      <div className="flex flex-col p-5 gap-4 flex-1 z-10">
-        <div className="flex justify-between items-start gap-2">
-          <h4 className="text-lg font-medium text-text-light group-hover:text-white transition-colors">
+      <div className="relative z-10 flex flex-col p-6 md:p-8 gap-5 h-full">
+        {/* Header */}
+        <div className="flex flex-col gap-2">
+          <h3 className="text-xl md:text-2xl font-medium tracking-tight text-text-light group-hover:text-white transition-colors">
             {project.title}
-          </h4>
-          <span className={`text-[9px] font-mono px-2 py-1 rounded border uppercase tracking-wider shrink-0 ${
-            project.status === 'LIVE' ? 'border-green-900/50 text-green-500 bg-green-950/20' :
-            project.status === 'BETA' ? 'border-yellow-900/50 text-yellow-500 bg-yellow-950/20' :
-            'border-primary-700/50 text-primary-400 bg-primary-800'
-          }`}>
-            {project.status}
-          </span>
+          </h3>
+          <p className="text-sm md:text-base text-primary-400 font-light leading-relaxed">
+            {project.description}
+          </p>
         </div>
 
-        <p className="text-sm text-primary-400 font-light leading-relaxed flex-1">
-          {project.description}
-        </p>
+        {/* Metadata Spacer */}
+        <div className="flex-1 min-h-[1.5rem]" />
 
-        <div className="flex flex-col gap-3 mt-2 border-t border-primary-800/50 pt-4">
-          <Mono className="text-[10px] text-primary-500">{project.tech}</Mono>
-          
-          <div className="flex items-center gap-2 group/arch-cta mt-1">
-            <span className="font-mono text-[9px] text-accent/60 group-hover:text-accent transition-colors uppercase tracking-widest">
-              View Architecture
+        {/* Metadata Footer */}
+        <div className="flex flex-col gap-4 mt-2">
+          <div className="flex justify-between items-start border-t border-primary-800/60 pt-5">
+            <div className="flex flex-col gap-1.5 max-w-[70%]">
+              <span className="font-mono text-[9px] text-primary-600 uppercase tracking-widest">Stack</span>
+              <Mono className="text-[10px] text-primary-400">{project.tech}</Mono>
+            </div>
+            
+            <div className="flex flex-col gap-1.5 items-end">
+              <span className="font-mono text-[9px] text-primary-600 uppercase tracking-widest">Status</span>
+              <span className={`text-[9px] font-mono px-2 py-0.5 rounded border uppercase tracking-wider ${
+                project.status === 'LIVE' || project.status === 'ACTIVE' ? 'border-green-900/50 text-green-500 bg-green-950/20' :
+                project.status === 'BETA' ? 'border-yellow-900/50 text-yellow-500 bg-yellow-950/20' :
+                'border-primary-700/50 text-primary-500 bg-primary-800/30'
+              }`}>
+                {project.status}
+              </span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex items-center gap-2 group/cta cursor-none pt-3 overflow-hidden">
+            <span className="font-mono text-[10px] tracking-[0.15em] text-accent/60 group-hover:text-accent transition-colors uppercase">
+              Inspect Architecture
             </span>
             <motion.span
-              className="font-mono text-[9px] text-accent/60 group-hover:text-accent"
-              animate={{ x: [0, 3, 0] }}
+              className="font-mono text-[10px] text-accent/60 group-hover:text-accent"
+              animate={{ x: [0, 4, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
             >
               →
@@ -550,57 +240,33 @@ const ArchiveProjectCard = ({ project, index }: { project: typeof archiveProject
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export const SelectedWork = () => {
   const containerRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start'],
-  });
 
   return (
-    <section ref={containerRef} className="py-24 md:py-36 px-6 md:px-12 lg:px-24 bg-primary-800 relative z-10 overflow-hidden">
+    <section ref={containerRef} className="py-24 md:py-36 px-6 md:px-12 lg:px-24 bg-primary-900 relative z-10 overflow-hidden">
       <div className="max-w-[1600px] mx-auto relative z-10">
         
-        {/* Featured Systems Header */}
+        {/* Standard Section Header */}
         <motion.div
-          className="mb-16 flex flex-col md:flex-row justify-between md:items-end border-b border-primary-700 pb-8 gap-4"
+          className="mb-16 md:mb-24 flex flex-col border-b border-primary-800/60 pb-6 gap-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Heading className="tracking-tighter"><StaggeredReveal text="Featured Systems" /></Heading>
-          <Mono className="text-primary-500">01 — 02</Mono>
+          <Mono className="text-accent text-sm md:text-base font-semibold">01 — PROJECTS</Mono>
+          <div className="h-[1px] w-8 md:w-16 bg-primary-700" />
+          <Heading className="text-3xl md:text-4xl lg:text-5xl tracking-tighter uppercase text-text-light mt-2">
+            System Registry
+          </Heading>
+          <Body className="max-w-2xl text-primary-400 font-light text-base md:text-lg leading-relaxed mt-2">
+            A curated collection of products, systems, infrastructure experiments, and engineering artifacts.
+          </Body>
         </motion.div>
 
-        {/* Featured Systems Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 mb-32 md:mb-48">
-          {featuredProjects.map((project, index) => (
-            <ProjectCard
-              key={index}
-              project={project}
-              index={index}
-              scrollYProgress={scrollYProgress}
-            />
-          ))}
-        </div>
-
-        {/* System Archive Header */}
-        <motion.div
-          className="mb-12 flex flex-col md:flex-row justify-between md:items-end border-b border-primary-700 pb-6 gap-4"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <h2 className="text-3xl md:text-4xl font-medium tracking-tight text-text-light">
-            System Archive
-          </h2>
-          <Mono className="text-primary-500 uppercase tracking-widest text-[10px]">Previous Architectures</Mono>
-        </motion.div>
-
-        {/* System Archive Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {archiveProjects.map((project, index) => (
-            <ArchiveProjectCard
+        {/* Unified Systems Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          {allProjects.map((project, index) => (
+            <SystemCard
               key={index}
               project={project}
               index={index}
