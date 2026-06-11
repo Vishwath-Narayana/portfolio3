@@ -413,7 +413,7 @@ const CinematicPortrait = ({ mouseX, mouseY }: { mouseX: MotionValue<number>, mo
       {/* Portrait Container */}
       <div className="relative w-full h-full overflow-hidden border border-white/10 bg-[#020202]">
         <motion.img 
-          src="/portrait.png" 
+          src="/images/portrait.png" 
           alt="Vishwath"
           style={{ scale: imgScale }}
           className="w-full h-full object-cover mix-blend-luminosity opacity-80"
