@@ -579,16 +579,16 @@ export const Hero = () => {
               >
                 <div className="flex flex-col gap-2">
                   <span className="text-accent/90 font-mono text-[10px] tracking-widest uppercase">
-                    Creative Designer & Developer
+                    Data & Full Stack Engineer
                   </span>
                   <Body className="text-white/40 font-light" style={{ fontSize: '15px', lineHeight: 1.7 }}>
-                    Building cinematic interfaces, scalable systems, and precision-engineered digital experiences.
+                    Building cinematic interfaces, scalable data pipelines, and precision-engineered digital experiences.
                   </Body>
                 </div>
                 
                 {/* Domain Tags */}
                 <div className="flex flex-wrap gap-4 mt-2">
-                  {['SYSTEM DESIGN', 'ARCHITECTURE', 'PAYMENTS', 'DEVOPS', 'AI SYSTEMS'].map((tag) => (
+                  {['DATA ENGINEERING', 'ARCHITECTURE', 'PAYMENTS', 'DEVOPS', 'AI SYSTEMS'].map((tag) => (
                     <div key={tag} className="flex items-center gap-2 opacity-60">
                       <span className="w-1 h-1 bg-accent/40" />
                       <span className="font-mono text-[8.5px] tracking-[0.2em] text-white/50 uppercase">{tag}</span>

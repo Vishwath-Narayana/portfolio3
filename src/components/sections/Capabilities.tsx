@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 const capabilityGroups = [
   {
-    title: 'Design Systems',
+    title: 'UI Engineering',
     items: ['Component Architecture', 'Design Tokens', 'Figma Variables', 'Accessibility (WCAG)', 'Interactive Prototypes']
   },
   {
@@ -12,12 +12,28 @@ const capabilityGroups = [
     items: ['React / Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion / GSAP', 'WebGL / Three.js']
   },
   {
-    title: 'Backend & Cloud',
+    title: 'Backend Engineering',
     items: ['Node.js / Express', 'PostgreSQL / Prisma', 'REST / GraphQL', 'Serverless Functions', 'Redis Caching']
   },
   {
     title: 'DevOps & Infra',
-    items: ['Docker', 'CI/CD Pipelines', 'AWS / Vercel', 'System Architecture', 'Performance Profiling']
+    items: ['Docker', 'CI/CD Pipelines', 'AWS / Vercel', 'Linux / Unix', 'Performance Profiling']
+  },
+  {
+    title: 'Programming & Tools',
+    items: ['Python', 'SQL', 'Shell Scripting (Bash)', 'Git & GitHub', 'Amazon Q']
+  },
+  {
+    title: 'AWS Cloud',
+    items: ['S3, Lambda, EC2', 'RDS & IAM', 'AWS Glue & Athena', 'Amazon Redshift', 'AWS AppFlow']
+  },
+  {
+    title: 'Data Engineering',
+    items: ['ETL / ELT', 'Data Lakes', 'Data Warehousing', 'CDC (Change Data Capture)', 'Batch Processing']
+  },
+  {
+    title: 'Big Data & Orch.',
+    items: ['Apache Airflow', 'PySpark', 'Apache Spark', 'API Integration', 'Distributed Processing']
   }
 ];
 

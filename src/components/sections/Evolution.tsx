@@ -1,24 +1,27 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Heading, Mono, Body } from '../ui/Typography';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 const events = [
   { year: '2021', title: 'Interface Design', description: 'Discovered the emotional impact of typography precision, modular grids, and brutalist spatial systems.' },
-  { year: '2022', title: 'Frontend Systems', description: 'Mastering component lifecycles and global state management. Building robust design systems for scale.' },
+  { year: '2022', title: 'Frontend Systems', description: 'Mastering component lifecycles and global state management. Building robust UI architectures for scale.' },
   { year: '2023', title: 'Motion Engineering', description: 'Moved beyond static CSS into DOM interpolation and WebGL. Making interfaces communicate through inertia.' },
   { year: '2024', title: 'Backend Architecture', description: 'Shifted focus to the metal. Designing normalized databases and scalable APIs to power dense data-heavy applications.' },
   { year: '2025', title: 'Cloud & Infrastructure', description: 'Obsessed with edge computing, CI/CD, and serverless. Realized that fragile architecture ruins perfect UX.' },
-  { year: '2026', title: 'Creative Engineering Systems', description: 'Fusing backend architecture with physics-based frontend interactions to build products that feel fundamentally alive.' },
+  { year: '2026', title: 'Full Stack Integration', description: 'Fusing backend architecture with physics-based frontend interactions to build products that feel fundamentally alive.' },
+  { year: '2027', title: 'Data Engineering', description: 'Architecting end-to-end AWS cloud data solutions. Fusing stream processing with data warehousing to build pipelines that scale infinitely.' }
 ];
 
 const TimelineItem = ({ 
   event, 
+  isFirst,
   isLast, 
-  lastNodeRef 
+  nodeRef 
 }: { 
   event: typeof events[0]; 
+  isFirst: boolean;
   isLast: boolean; 
-  lastNodeRef?: React.RefObject<HTMLDivElement | null>;
+  nodeRef?: React.RefObject<HTMLDivElement | null>;
 }) => {
   return (
     <motion.div
@@ -30,7 +33,7 @@ const TimelineItem = ({
     >
       {/* Col 1: Year */}
       <div className="pt-1 text-right pr-2">
-        <Mono className={`text-xl transition-colors duration-500 ${isLast ? 'text-accent font-medium' : 'text-primary-900/40 group-hover:text-accent'}`}>
+        <Mono className={`text-xl transition-colors duration-500 ${isLast ? 'text-accent font-medium' : isFirst ? 'text-accent font-medium' : 'text-primary-900/40 group-hover:text-accent'}`}>
           {event.year}
         </Mono>
       </div>
@@ -39,7 +42,7 @@ const TimelineItem = ({
       <div className="flex justify-center relative pt-[10px] z-20">
         {/* The Node */}
         <div 
-          ref={isLast ? lastNodeRef : undefined}
+          ref={nodeRef}
           className={`rounded-full border z-10 transition-all duration-500 ${isLast ? 'w-[13px] h-[13px] bg-accent border-accent shadow-[0_0_12px_rgba(255,90,54,0.6)] -translate-y-[2px]' : 'w-[9px] h-[9px] bg-[#1A1A1A] border-primary-800 group-hover:bg-accent group-hover:scale-125 group-hover:shadow-[0_0_8px_rgba(255,90,54,0.8)]'}`} 
         />
       </div>
@@ -60,39 +63,63 @@ const TimelineItem = ({
 export const Evolution = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const firstNodeRef = useRef<HTMLDivElement>(null);
   const lastNodeRef = useRef<HTMLDivElement>(null);
-  const [spineHeight, setSpineHeight] = useState(0);
+  const [spineTop, setSpineTop] = useState(0);
+  const [spineLength, setSpineLength] = useState(0);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start center", "end center"]
   });
 
-  const scaleY = useTransform(scrollYProgress, [0.05, 0.95], [0, 1]);
+  const scaleY = useTransform(scrollYProgress, [0.02, 0.82], [0, 1]);
+
+  const updateSpineDimensions = useCallback(() => {
+    if (timelineRef.current && firstNodeRef.current && lastNodeRef.current) {
+      const timelineRect = timelineRef.current.getBoundingClientRect();
+      const firstRect = firstNodeRef.current.getBoundingClientRect();
+      const lastRect = lastNodeRef.current.getBoundingClientRect();
+
+      // Center of first node relative to timeline container
+      const firstCenter = firstRect.top + (firstRect.height / 2) - timelineRect.top;
+      // Center of last node relative to timeline container
+      const lastCenter = lastRect.top + (lastRect.height / 2) - timelineRect.top;
+
+      setSpineTop(firstCenter);
+      setSpineLength(lastCenter - firstCenter);
+    }
+  }, []);
 
   useEffect(() => {
-    const updateSpineHeight = () => {
-      if (timelineRef.current && lastNodeRef.current) {
-        const timelineRect = timelineRef.current.getBoundingClientRect();
-        const nodeRect = lastNodeRef.current.getBoundingClientRect();
-        // Distance from the top of timeline container to center of the last node
-        const relativeTop = nodeRect.top + (nodeRect.height / 2) - timelineRect.top;
-        setSpineHeight(relativeTop);
-      }
-    };
+    updateSpineDimensions();
 
-    // Calculate height on mount
-    updateSpineHeight();
+    // Multiple RAF frames to handle font loading and framer-motion initial animations
+    let rafId1: number, rafId2: number, rafId3: number;
+    rafId1 = requestAnimationFrame(() => {
+      updateSpineDimensions();
+      rafId2 = requestAnimationFrame(() => {
+        updateSpineDimensions();
+        rafId3 = requestAnimationFrame(updateSpineDimensions);
+      });
+    });
 
-    // Use a small fallback/raf loop to handle font loading or layout shifts
-    const rafId = requestAnimationFrame(updateSpineHeight);
+    // Use ResizeObserver on the timeline container for robust recalculation
+    let observer: ResizeObserver | null = null;
+    if (timelineRef.current) {
+      observer = new ResizeObserver(updateSpineDimensions);
+      observer.observe(timelineRef.current);
+    }
 
-    window.addEventListener('resize', updateSpineHeight);
+    window.addEventListener('resize', updateSpineDimensions);
     return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', updateSpineHeight);
+      cancelAnimationFrame(rafId1);
+      cancelAnimationFrame(rafId2);
+      cancelAnimationFrame(rafId3);
+      observer?.disconnect();
+      window.removeEventListener('resize', updateSpineDimensions);
     };
-  }, []);
+  }, [updateSpineDimensions]);
 
   return (
     <section ref={containerRef} className="pt-24 md:pt-36 pb-12 md:pb-16 px-6 md:px-12 lg:px-24 bg-warm-100 text-primary-900 selection:bg-accent selection:text-white border-t border-primary-900/5 relative overflow-hidden">
@@ -116,30 +143,39 @@ export const Evolution = () => {
             <Mono className="text-accent text-sm md:text-base font-semibold">05 — TRAJECTORY</Mono>
             <div className="h-[1px] w-8 md:w-16 bg-primary-900/20" />
             <Heading className="text-3xl md:text-4xl lg:text-5xl tracking-tighter uppercase text-primary-900 mt-2">
-              Creative Evolution
+              Engineering Evolution
             </Heading>
           </motion.div>
 
         <div ref={timelineRef} className="max-w-5xl mx-auto flex flex-col relative">
           
-          {/* Static Background Spine */}
+          {/* Static Background Spine — spans exactly from first dot center to last dot center */}
           <div 
-            style={{ height: spineHeight ? `${spineHeight - 14}px` : 'calc(100% - 14px)' }}
-            className="absolute left-[104px] md:left-[132px] -translate-x-[0.5px] top-[14px] w-[1px] bg-primary-900/10 z-0 pointer-events-none" 
+            style={{ 
+              top: spineLength ? `${spineTop}px` : '14px',
+              height: spineLength ? `${spineLength}px` : 'calc(100% - 14px)' 
+            }}
+            className="absolute left-[104px] md:left-[132px] -translate-x-[0.5px] w-[1px] bg-primary-900/10 z-0 pointer-events-none" 
           />
           
-          {/* Dynamic Active Journey Spine */}
+          {/* Dynamic Active Journey Spine — same positioning, animated with scroll */}
           <motion.div 
-            style={{ scaleY, originY: 0, height: spineHeight ? `${spineHeight - 14}px` : 'calc(100% - 14px)' }}
-            className="absolute left-[104px] md:left-[132px] -translate-x-[0.5px] top-[14px] w-[1px] bg-accent z-10 origin-top pointer-events-none shadow-[0_0_6px_rgba(255,90,54,0.4)]"
+            style={{ 
+              scaleY, 
+              originY: 0, 
+              top: spineLength ? `${spineTop}px` : '14px',
+              height: spineLength ? `${spineLength}px` : 'calc(100% - 14px)' 
+            }}
+            className="absolute left-[104px] md:left-[132px] -translate-x-[0.5px] w-[1px] bg-accent z-10 origin-top pointer-events-none shadow-[0_0_6px_rgba(255,90,54,0.4)]"
           />
 
           {events.map((event, index) => (
             <TimelineItem 
               key={index} 
               event={event} 
+              isFirst={index === 0}
               isLast={index === events.length - 1}
-              lastNodeRef={index === events.length - 1 ? lastNodeRef : undefined}
+              nodeRef={index === 0 ? firstNodeRef : index === events.length - 1 ? lastNodeRef : undefined}
             />
           ))}
         </div>
@@ -148,4 +184,5 @@ export const Evolution = () => {
     </section>
   );
 };
+
 
