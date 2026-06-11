@@ -72,11 +72,11 @@ export const Philosophy = () => {
           <div className="flex flex-col gap-6 border-t border-primary-900/10 pt-8 group">
             <div className="flex justify-between items-center">
               <span className="font-mono text-sm text-accent font-semibold">[SYS_01]</span>
-              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Data Architecture</span>
+              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Frontend Facade</span>
             </div>
-            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">The Illusion of Scale</h3>
+            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">The Illusion of Frontend</h3>
             <Body className="text-primary-800/80 leading-relaxed text-base md:text-lg font-light">
-              We often treat dashboards as the product. But powerful analytics backed by brittle pipelines is a facade. Real insights are bound by data integrity, ETL latency, and warehouse architecture. I engineer from the source up.
+              We often treat the interface as the product. But a beautiful UI backed by brittle architecture is a facade. Real user experience is bound by latency, deployment models, and database design. I engineer from the metal up.
             </Body>
           </div>
 
@@ -84,11 +84,11 @@ export const Philosophy = () => {
           <div className="flex flex-col gap-6 border-t border-primary-900/10 pt-8 group">
             <div className="flex justify-between items-center">
               <span className="font-mono text-sm text-accent font-semibold">[SYS_02]</span>
-              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Pipeline Resiliency</span>
+              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Motion Physics</span>
             </div>
-            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">Failure as Feedback</h3>
+            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">Motion as Feedback</h3>
             <Body className="text-primary-800/80 leading-relaxed text-base md:text-lg font-light">
-              Errors aren't anomalies; they are expected states. Using distributed orchestration and CDC, I architect pipelines that provide automatic remediation. A data system that gracefully recovers feels inherently more trustworthy.
+              Motion isn't decoration; it's communication. Using physics-based DOM interpolation, I design interactions that provide subconscious reassurance. A system that moves with natural inertia feels inherently more trustworthy.
             </Body>
           </div>
 
@@ -96,11 +96,11 @@ export const Philosophy = () => {
           <div className="flex flex-col gap-6 border-t border-primary-900/10 pt-8 group">
             <div className="flex justify-between items-center">
               <span className="font-mono text-sm text-accent font-semibold">[SYS_03]</span>
-              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Cloud Infrastructure</span>
+              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Token Architecture</span>
             </div>
-            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">Lakes, Not Silos</h3>
+            <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">Systems, Not Pages</h3>
             <Body className="text-primary-800/80 leading-relaxed text-base md:text-lg font-light">
-              I do not build isolated databases. I design scalable AWS architectures and centralized data lakes that empower analytics teams. True scalability comes from minimizing data duplication at the foundation.
+              I do not design pages. I design scalable token architectures and modular components that empower product teams. True scalability comes from minimizing entropy at the foundation.
             </Body>
           </div>
 
@@ -108,11 +108,11 @@ export const Philosophy = () => {
           <div className="flex flex-col gap-6 border-t border-primary-900/10 pt-8 group">
             <div className="flex justify-between items-center">
               <span className="font-mono text-sm text-accent font-semibold">[SYS_04]</span>
-              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Data Governance</span>
+              <span className="font-mono text-[10px] tracking-widest text-primary-900/40 uppercase">Cognitive Load</span>
             </div>
             <h3 className="text-2xl lg:text-3xl font-medium tracking-tight text-primary-900 leading-tight">Engineering Empathy</h3>
             <Body className="text-primary-800/80 leading-relaxed text-base md:text-lg font-light">
-              The best data engineers understand the business logic of their analysts. The best analysts understand the compute cost of their queries. I exist in the overlap, ensuring neither side compromises the other.
+              The best developers understand the cognitive load of their end users. The best designers understand the runtime cost of their animations. I exist in the overlap, ensuring neither side compromises the other.
             </Body>
           </div>
         </motion.div>

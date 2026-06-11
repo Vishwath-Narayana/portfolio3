@@ -4,20 +4,20 @@ import { useState } from 'react';
 
 const capabilityGroups = [
   {
-    title: 'Programming & Tools',
-    items: ['Python', 'SQL', 'Shell Scripting (Bash)', 'Git & GitHub', 'Linux', 'Amazon Q']
+    title: 'Design Systems',
+    items: ['Component Architecture', 'Design Tokens', 'Figma Variables', 'Accessibility (WCAG)', 'Interactive Prototypes']
   },
   {
-    title: 'AWS Cloud',
-    items: ['S3', 'Lambda', 'EC2 & RDS', 'IAM', 'Glue & Athena', 'Redshift & AppFlow']
+    title: 'Frontend Engineering',
+    items: ['React / Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion / GSAP', 'WebGL / Three.js']
   },
   {
-    title: 'Data Engineering',
-    items: ['ETL / ELT', 'Data Lakes', 'Data Warehousing', 'Change Data Capture (CDC)', 'API Integration', 'Batch Processing']
+    title: 'Backend & Cloud',
+    items: ['Node.js / Express', 'PostgreSQL / Prisma', 'REST / GraphQL', 'Serverless Functions', 'Redis Caching']
   },
   {
-    title: 'Big Data & Orch.',
-    items: ['PySpark', 'Apache Spark', 'Apache Airflow', 'Data Orchestration', 'Distributed Processing']
+    title: 'DevOps & Infra',
+    items: ['Docker', 'CI/CD Pipelines', 'AWS / Vercel', 'System Architecture', 'Performance Profiling']
   }
 ];
 
