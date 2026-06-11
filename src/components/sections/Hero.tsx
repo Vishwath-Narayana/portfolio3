@@ -354,7 +354,7 @@ const InteractiveHeadline = ({ mouseX, mouseY }: { mouseX: MotionValue<number>, 
     <div 
       className="font-black text-white leading-[0.9] tracking-[-0.03em] flex flex-col items-start gap-1 md:gap-2"
       style={{
-        fontSize: 'clamp(2.8rem, 6.5vw, 7.5rem)',
+        fontSize: 'clamp(2.8rem, 7vw, 8.2rem)',
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
       }}
     >
@@ -402,7 +402,7 @@ const CinematicPortrait = ({ mouseX, mouseY }: { mouseX: MotionValue<number>, mo
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.6, ease: [0.25, 1, 0.5, 1], delay: 0.7 }}
       className="relative flex items-center justify-center pointer-events-none mx-auto lg:ml-auto"
-      style={{ width: 'clamp(260px, 30vw, 360px)', aspectRatio: '3/4' }}
+      style={{ width: 'clamp(290px, 33vw, 420px)', aspectRatio: '3/4' }}
     >
       {/* Background Glow */}
       <motion.div 
@@ -561,19 +561,29 @@ export const Hero = () => {
 
         {/* ── LAYER 3: Foreground Content Grid ── */}
         <div className="absolute inset-0 z-[20] flex flex-col justify-center px-8 md:px-12 lg:px-24 pointer-events-auto">
-          <div className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* LEFT SIDE: Typography */}
-            <div className="lg:col-span-8 flex flex-col gap-8 md:gap-10 pl-4 md:pl-8 lg:pl-16">
+          <div className="w-full max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
 
+            {/* LEFT SIDE: Typography */}
+            <div className="lg:col-span-7 flex flex-col gap-7 md:gap-8">
+
+              {/* Eyebrow — anchors the headline and gives the column a top edge */}
+              <motion.div
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
+                className="flex items-center gap-3"
+              >
+                <span className="h-px w-12 bg-accent/70" />
+                <span className="font-mono text-[10px] tracking-[0.35em] text-white/50 uppercase">Introduction</span>
+              </motion.div>
 
               <InteractiveHeadline mouseX={mouseX} mouseY={mouseY} />
 
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-                className="max-w-md lg:mt-4 flex flex-col gap-6"
+                className="max-w-lg flex flex-col gap-6"
               >
                 <div className="flex flex-col gap-2">
                   <span className="text-accent/90 font-mono text-[10px] tracking-widest uppercase">
@@ -583,7 +593,7 @@ export const Hero = () => {
                     Building cinematic interfaces, scalable data pipelines, and precision-engineered digital experiences.
                   </Body>
                 </div>
-                
+
                 {/* Domain Tags */}
                 <div className="flex flex-wrap gap-4 mt-2">
                   {['DATA ENGINEERING', 'AWS CLOUD', 'FULL STACK', 'DEVOPS', 'ARCHITECTURE'].map((tag) => (
@@ -594,10 +604,27 @@ export const Hero = () => {
                   ))}
                 </div>
               </motion.div>
+
+              {/* Scroll cue — fills the lower-left and closes the composition */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 1, ease: 'easeOut' }}
+                className="hidden lg:flex items-center gap-3 mt-4"
+              >
+                <motion.span
+                  animate={{ y: [0, 5, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                  className="font-mono text-accent/70 text-sm leading-none"
+                >
+                  ↓
+                </motion.span>
+                <span className="font-mono text-[9px] tracking-[0.3em] text-white/35 uppercase">Scroll to explore</span>
+              </motion.div>
             </div>
 
             {/* RIGHT SIDE: Cinematic Portrait */}
-            <div className="lg:col-span-4 flex justify-center lg:justify-end mt-16 lg:mt-0">
+            <div className="lg:col-span-5 flex justify-center lg:justify-end mt-16 lg:mt-0">
               <CinematicPortrait mouseX={mouseX} mouseY={mouseY} />
             </div>
 
