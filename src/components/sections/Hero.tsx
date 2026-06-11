@@ -411,24 +411,22 @@ const CinematicPortrait = ({ mouseX, mouseY }: { mouseX: MotionValue<number>, mo
       />
       
       {/* Portrait Container */}
-      <div className="relative w-full h-full overflow-hidden border border-white/10 bg-[#020202]">
-        <motion.img 
-          src="/images/portrait.png" 
+      <div className="relative w-full h-full overflow-hidden border border-white/10 bg-black">
+        {/* Base photo — already cinematically graded (red key light on black); keep it natural */}
+        <motion.img
+          src="/images/hero.png"
           alt="Vishwath"
           style={{ scale: imgScale }}
-          className="w-full h-full object-cover mix-blend-luminosity opacity-80"
+          className="w-full h-full object-cover object-[50%_28%]"
         />
-        
-        {/* Soft Red Overlay for Atmosphere */}
-        <div className="absolute inset-0 bg-accent mix-blend-overlay opacity-30" />
-        
-        {/* Scanlines Overlay */}
-        <div className="absolute inset-0 opacity-[0.15]"
-          style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.2) 3px, rgba(255,255,255,0.2) 4px)' }}
+
+        {/* Scanlines — subtle ID-scanner texture */}
+        <div className="absolute inset-0 opacity-[0.08] pointer-events-none"
+          style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.14) 3px, rgba(255,255,255,0.14) 4px)' }}
         />
-        
-        {/* Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
+
+        {/* Soft bottom vignette so the label stays legible over the frame */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent pointer-events-none" />
         
         {/* Telemetry Accents */}
         <div className="absolute top-4 left-4 flex gap-2 items-center">
