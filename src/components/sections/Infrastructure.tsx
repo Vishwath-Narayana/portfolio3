@@ -446,7 +446,7 @@ export const Infrastructure = () => {
               <MetricRow label="DEPLOYMENTS"         value="38"          status="none"     delay={0.25} />
               <MetricRow label="AI_MODELS_TESTED"    value="12"          status="none"     delay={0.3}  />
               <MetricRow label="SYSTEM_STATUS"       value="BUILDING"    status="building" delay={0.35} highlight />
-              <MetricRow label="CURRENT_FOCUS"       value="CREATIVE ENG" status="active"  delay={0.4}  />
+              <MetricRow label="CURRENT_FOCUS"       value="DATA PIPELINES" status="active"  delay={0.4}  />
             </div>
 
             {/* 24-week sparkline */}
@@ -463,7 +463,7 @@ export const Infrastructure = () => {
                 { period: 'Jun–Aug 2025', note: 'Backend architecture deep-dive', intensity: 2 },
                 { period: 'Sep–Nov 2025', note: 'Cloud + infra systems sprint', intensity: 3 },
                 { period: 'Dec 2025',     note: 'Portfolio v2 launch',           intensity: 4 },
-                { period: 'Jan–Mar 2026', note: 'Creative engineering systems',  intensity: 4 },
+                { period: 'Jan–Mar 2026', note: 'Enterprise data architecture',  intensity: 4 },
                 { period: 'Apr–May 2026', note: 'Current — active build streak', intensity: 4 },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">

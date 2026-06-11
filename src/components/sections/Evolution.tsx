@@ -3,12 +3,12 @@ import { Heading, Mono, Body } from '../ui/Typography';
 import { useRef, useState, useEffect } from 'react';
 
 const events = [
-  { year: '2021', title: 'Interface Design', description: 'Discovered the emotional impact of typography precision, modular grids, and brutalist spatial systems.' },
-  { year: '2022', title: 'Frontend Systems', description: 'Mastering component lifecycles and global state management. Building robust design systems for scale.' },
-  { year: '2023', title: 'Motion Engineering', description: 'Moved beyond static CSS into DOM interpolation and WebGL. Making interfaces communicate through inertia.' },
-  { year: '2024', title: 'Backend Architecture', description: 'Shifted focus to the metal. Designing normalized databases and scalable APIs to power dense data-heavy applications.' },
-  { year: '2025', title: 'Cloud & Infrastructure', description: 'Obsessed with edge computing, CI/CD, and serverless. Realized that fragile architecture ruins perfect UX.' },
-  { year: '2026', title: 'Creative Engineering Systems', description: 'Fusing backend architecture with physics-based frontend interactions to build products that feel fundamentally alive.' },
+  { year: '2021', title: 'Software Engineering', description: 'Built foundational programming skills in Python and SQL. Developed a passion for writing clean, modular code.' },
+  { year: '2022', title: 'Data Pipelines', description: 'Transitioned from scripting to engineering. Built my first ETL pipelines and discovered the power of automated batch processing.' },
+  { year: '2023', title: 'Big Data Processing', description: 'Moved beyond single-node processing into distributed systems. Mastered PySpark and Apache Spark to handle massive datasets.' },
+  { year: '2024', title: 'Orchestration & CDC', description: 'Shifted focus to reliability. Implemented Change Data Capture systems and used Apache Airflow to orchestrate complex dependencies.' },
+  { year: '2025', title: 'Cloud Data Lakes', description: 'Obsessed with AWS architecture. Built scalable data lakes using S3, Glue, and Athena. Realized that robust infrastructure is everything.' },
+  { year: '2026', title: 'Enterprise Data Architecture', description: 'Architecting end-to-end cloud data solutions. Fusing stream processing with data warehousing to build pipelines that scale infinitely.' },
 ];
 
 const TimelineItem = ({ 
@@ -116,7 +116,7 @@ export const Evolution = () => {
             <Mono className="text-accent text-sm md:text-base font-semibold">05 — TRAJECTORY</Mono>
             <div className="h-[1px] w-8 md:w-16 bg-primary-900/20" />
             <Heading className="text-3xl md:text-4xl lg:text-5xl tracking-tighter uppercase text-primary-900 mt-2">
-              Creative Evolution
+              Engineering Evolution
             </Heading>
           </motion.div>
 
