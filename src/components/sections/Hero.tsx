@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useMotionValue, useSpring, useAnimationFrame } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValue, useSpring, useAnimationFrame, type MotionValue } from 'framer-motion';
 import { Body } from '../ui/Typography';
 import { useRef, useEffect, useState } from 'react';
 
@@ -300,7 +300,7 @@ const ForegroundDepth = () => (
 );
 
 // ─── Interactive Typography ────────────────────────────────────────────────────
-const InteractiveWord = ({ text, mouseX, mouseY, delay }: { text: string, mouseX: any, mouseY: any, delay: number }) => {
+const InteractiveWord = ({ text, mouseX, mouseY, delay }: { text: string, mouseX: MotionValue<number>, mouseY: MotionValue<number>, delay: number }) => {
   const ref = useRef<HTMLDivElement>(null);
   const x = useSpring(0, { stiffness: 120, damping: 20 });
   const y = useSpring(0, { stiffness: 120, damping: 20 });
@@ -349,7 +349,7 @@ const InteractiveWord = ({ text, mouseX, mouseY, delay }: { text: string, mouseX
   );
 };
 
-const InteractiveHeadline = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
+const InteractiveHeadline = ({ mouseX, mouseY }: { mouseX: MotionValue<number>, mouseY: MotionValue<number> }) => {
   return (
     <div 
       className="font-black text-white leading-[0.9] tracking-[-0.03em] flex flex-col items-start gap-1 md:gap-2"
@@ -368,7 +368,7 @@ const InteractiveHeadline = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) =
 };
 
 // ─── Cinematic Portrait ────────────────────────────────────────────────────────
-const CinematicPortrait = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
+const CinematicPortrait = ({ mouseX, mouseY }: { mouseX: MotionValue<number>, mouseY: MotionValue<number> }) => {
   const ref = useRef<HTMLDivElement>(null);
   const proximity = useSpring(0, { stiffness: 50, damping: 20 });
 
@@ -581,7 +581,7 @@ export const Hero = () => {
                   <span className="text-accent/90 font-mono text-[10px] tracking-widest uppercase">
                     Creative Designer & Developer
                   </span>
-                  <Body className="text-white/40 font-light" style={{ fontSize: '15px', lineHeight: 1.7 } as any}>
+                  <Body className="text-white/40 font-light" style={{ fontSize: '15px', lineHeight: 1.7 }}>
                     Building cinematic interfaces, scalable systems, and precision-engineered digital experiences.
                   </Body>
                 </div>

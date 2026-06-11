@@ -342,7 +342,7 @@ export const Infrastructure = () => {
   const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
-    let timeoutId: any;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const handleScroll = () => {
       setIsScrolling(true);
       clearTimeout(timeoutId);

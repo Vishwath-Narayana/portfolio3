@@ -32,9 +32,13 @@ const SignalFocusText = ({ text }: { text: string }) => {
       }, 50);
     };
 
-    setTimeout(stabilize, 500);
+    const initialDelay = setTimeout(stabilize, 500);
     const cycle = setInterval(() => { stabilize(); }, 6000);
-    return () => { clearInterval(scrambleInterval); clearInterval(cycle); };
+    return () => {
+      clearTimeout(initialDelay);
+      clearInterval(scrambleInterval);
+      clearInterval(cycle);
+    };
   }, [text]);
 
   return <span className={isStabilizing ? 'text-primary-500 opacity-80' : ''}>{displayText}</span>;
@@ -42,10 +46,15 @@ const SignalFocusText = ({ text }: { text: string }) => {
 
 export const Contact = () => {
   const containerRef = useRef<HTMLElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  );
 
   useEffect(() => {
-    setIsMobile(window.matchMedia('(max-width: 768px)').matches);
+    const mql = window.matchMedia('(max-width: 768px)');
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
   }, []);
 
   const { scrollYProgress } = useScroll({

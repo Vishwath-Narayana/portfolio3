@@ -52,7 +52,7 @@ export const MagneticCursor = () => {
       window.removeEventListener('mousemove', moveCursor);
       document.removeEventListener('mouseover', handleMouseOver);
     };
-  }, []);
+  }, [cursorX, cursorY]);
 
   // Hide cursor on mobile
   if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return null;
