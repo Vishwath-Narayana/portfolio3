@@ -588,7 +588,7 @@ export const Hero = () => {
                 
                 {/* Domain Tags */}
                 <div className="flex flex-wrap gap-4 mt-2">
-                  {['DATA ENGINEERING', 'ARCHITECTURE', 'PAYMENTS', 'DEVOPS', 'AI SYSTEMS'].map((tag) => (
+                  {['DATA ENGINEERING', 'AWS CLOUD', 'FULL STACK', 'DEVOPS', 'ARCHITECTURE'].map((tag) => (
                     <div key={tag} className="flex items-center gap-2 opacity-60">
                       <span className="w-1 h-1 bg-accent/40" />
                       <span className="font-mono text-[8.5px] tracking-[0.2em] text-white/50 uppercase">{tag}</span>
